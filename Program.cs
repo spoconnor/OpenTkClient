@@ -9,6 +9,7 @@ using System.Text;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using System.Drawing.Imaging;
 
 namespace OpenTkClient
 {
@@ -19,6 +20,7 @@ namespace OpenTkClient
 		Font sans = new Font(FontFamily.GenericSansSerif, 24);
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
+		int blockTexture;
 
 		public TextRendering()
 			: base(800, 600)
@@ -27,6 +29,7 @@ namespace OpenTkClient
 
 		protected override void OnLoad(EventArgs e)
 		{
+			blockTexture = LoadTexture();
 			renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
 
@@ -37,6 +40,34 @@ namespace OpenTkClient
 			position.Y += sans.Height;
 			renderer.DrawString("The quick brown fox jumps over the lazy dog", mono, Brushes.White, position);
 			position.Y += mono.Height;
+		}
+
+
+		private int LoadTexture()
+		{
+			GL.Enable(EnableCap.Texture2D);	// enable texture mapping
+
+			int texture;
+			Bitmap bitmap = new Bitmap("block.png");
+
+			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
+			GL.GenTextures(1, out texture);
+			GL.BindTexture(TextureTarget.Texture2D, texture);
+
+			BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+				ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+			bitmap.UnlockBits(data);
+
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Repeat);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Repeat);
+
+			return texture;
 		}
 
 		protected override void OnUnload(EventArgs e)
@@ -61,15 +92,67 @@ namespace OpenTkClient
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			RenderCube((float)e.Time);
+			//RenderCube((float)e.Time);
 			RenderGui();
-
+			RenderBox ((float)e.Time);
+			//RenderBox2 ();
 			SwapBuffers();
+		}
+
+
+		// draw diamond and rectangle
+		void RenderBox2() {
+			GL.Color3(Color.Blue);				// set diamond color
+			GL.Begin(PrimitiveType.Polygon);                        // draw the diamond
+			GL.Vertex2(0.90, 0.50);
+			GL.Vertex2(0.50, 0.90);
+			GL.Vertex2(0.10, 0.50);
+			GL.Vertex2(0.50, 0.10);
+			GL.End();
+			GL.Color3(Color.White);                      // set rectangle color
+			GL.Rect(0.25, 0.25, 0.75, 0.75);            // draw the rectangle
+		}
+
+		void RenderBox(float time)
+		{
+			GL.MatrixMode(MatrixMode.Projection);
+			GL.LoadIdentity();
+			GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+			GL.MatrixMode(MatrixMode.Modelview);
+			GL.LoadIdentity();
+
+			//GL.Enable(EnableCap.Lighting);
+
+			GL.Disable(EnableCap.DepthTest);
+			GL.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Texture2D);
+
+			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
+
+			//GL.PushMatrix();
+
+			GL.Scale (0.1, 0.1, 0.1);
+			GL.Translate (-0.5, -0.5, 0);                          // Move To The Right Of The Character
+
+			//GL.NewList (boxList + loop1, ListMode.Compile);					// Start Building A List
+			//GL.Color3(Color.Red);
+			GL.Begin (PrimitiveType.Quads);								// Use A Quad For Each Character
+			GL.TexCoord2 (0,0);			// Texture Coord (Bottom Left)
+			GL.Vertex2 (-1, 1);							// Vertex Coord (Bottom Left)
+			GL.TexCoord2 (1,0);  // Texture Coord (Bottom Right)
+			GL.Vertex2 (1, 1);                         // Vertex Coord (Bottom Right)
+			GL.TexCoord2 (1,1);          // Texture Coord (Top Right)
+			GL.Vertex2 (1, -1);                          // Vertex Coord (Top Right)
+			GL.TexCoord2 (1,0);                  // Texture Coord (Top Left)
+			GL.Vertex2 (-1, -1);                           // Vertex Coord (Top Left)
+			GL.End ();                                       // Done Building Our Quad (Character)
+
+			//GL.PopMatrix ();
 		}
 
 		void RenderCube(float time)
 		{
-
             GL.LoadIdentity();                                      // Reset The Projection Matrix
             GL.Ortho(0.0f, Width, Height, 0.0f, -1.0f, 1.0f);
             GL.MatrixMode(MatrixMode.Modelview);
