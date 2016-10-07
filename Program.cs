@@ -69,15 +69,19 @@ namespace OpenTkClient
 
 		void RenderCube(float time)
 		{
-			Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(
-				MathHelper.PiOver2, Width / (float)Height, 1.0f, 128.0f);
-			Matrix4 modelview = Matrix4.LookAt(0, 3, 3, 0, 0, 0, 0, 1, 0);
 
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadMatrix(ref projection);
+            GL.LoadIdentity();                                      // Reset The Projection Matrix
+            GL.Ortho(0.0f, Width, Height, 0.0f, -1.0f, 1.0f);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();                                      // Reset The Modelview Matrix
 
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadMatrix(ref modelview);
+   //         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, Width / (float)Height, 1.0f, 128.0f);
+			//Matrix4 modelview = Matrix4.LookAt(0, 3, 3, 0, 0, 0, 0, 1, 0);
+
+			//GL.MatrixMode(MatrixMode.Projection);
+   //         GL.MatrixMode(MatrixMode.Modelview);
+			//GL.LoadMatrix(ref projection);
+
 			GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
 			angle +=  time * 100;
 
