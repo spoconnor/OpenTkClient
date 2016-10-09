@@ -29,6 +29,18 @@ namespace OpenTkClient
 
 		protected override void OnLoad(EventArgs e)
 		{
+
+            GL.ClearColor(Color.CornflowerBlue);
+            GL.Ortho(0, 800, 600, 0, -1, 1);
+            GL.Viewport(0, 0, 800, 600);
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+
+
 			blockTexture = LoadTexture();
 			renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
@@ -40,32 +52,31 @@ namespace OpenTkClient
 			position.Y += sans.Height;
 			renderer.DrawString("The quick brown fox jumps over the lazy dog", mono, Brushes.White, position);
 			position.Y += mono.Height;
+
 		}
 
 
 		private int LoadTexture()
 		{
-			GL.Enable(EnableCap.Texture2D);	// enable texture mapping
-
 			int texture;
 			Bitmap bitmap = new Bitmap("block.png");
-
-			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
 			GL.GenTextures(1, out texture);
 			GL.BindTexture(TextureTarget.Texture2D, texture);
 
-			BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
-				ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            bitmap.MakeTransparent(Color.Magenta);
 
-			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-			bitmap.UnlockBits(data);
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                                              ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int) TextureMinFilter.Linear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int) TextureMagFilter.Linear);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int) TextureWrapMode.Repeat);
-			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int) TextureWrapMode.Repeat);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                          OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+
+            bitmap.UnlockBits(data);
+            bitmap.Dispose();
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
 			return texture;
 		}
@@ -117,9 +128,9 @@ namespace OpenTkClient
 		{
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.LoadIdentity();
-			GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadIdentity();
+			//GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+			//GL.MatrixMode(MatrixMode.Modelview);
+			//GL.LoadIdentity();
 
 			//GL.Enable(EnableCap.Lighting);
 
@@ -139,13 +150,13 @@ namespace OpenTkClient
 			//GL.Color3(Color.Red);
 			GL.Begin (PrimitiveType.Quads);								// Use A Quad For Each Character
 			GL.TexCoord2 (0,0);			// Texture Coord (Bottom Left)
-			GL.Vertex2 (-1, 1);							// Vertex Coord (Bottom Left)
+			GL.Vertex2 (-1, -1);							// Vertex Coord (Bottom Left)
 			GL.TexCoord2 (1,0);  // Texture Coord (Bottom Right)
-			GL.Vertex2 (1, 1);                         // Vertex Coord (Bottom Right)
+			GL.Vertex2 (1, -1);                         // Vertex Coord (Bottom Right)
 			GL.TexCoord2 (1,1);          // Texture Coord (Top Right)
-			GL.Vertex2 (1, -1);                          // Vertex Coord (Top Right)
+			GL.Vertex2 (1, 1);                          // Vertex Coord (Top Right)
 			GL.TexCoord2 (1,0);                  // Texture Coord (Top Left)
-			GL.Vertex2 (-1, -1);                           // Vertex Coord (Top Left)
+			GL.Vertex2 (-1, 1);                           // Vertex Coord (Top Left)
 			GL.End ();                                       // Done Building Our Quad (Character)
 
 			//GL.PopMatrix ();
@@ -243,13 +254,6 @@ namespace OpenTkClient
 			GL.Enable(EnableCap.DepthTest);
 		}
 
-		public static void Main()
-		{
-			using (TextRendering example = new TextRendering())
-			{
-				//Utilities.SetWindowTitle(example);
-				example.Run(30.0);
-			}
-		}
+
 	}
 }
