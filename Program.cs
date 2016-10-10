@@ -21,6 +21,7 @@ namespace OpenTkClient
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
 		int blockTexture;
+        int boxListIndex;
 
 		public TextRendering()
 			: base(800, 600)
@@ -53,7 +54,8 @@ namespace OpenTkClient
 			renderer.DrawString("The quick brown fox jumps over the lazy dog", mono, Brushes.White, position);
 			position.Y += mono.Height;
 
-		}
+            boxListIndex = CompileBox();
+        }
 
 
 		private int LoadTexture()
@@ -113,61 +115,69 @@ namespace OpenTkClient
 
 		// draw diamond and rectangle
 		void RenderBox2() {
-			GL.Color3(Color.Blue);				// set diamond color
-			GL.Begin(PrimitiveType.Polygon);                        // draw the diamond
+			GL.Color3(Color.Blue);
+			GL.Begin(PrimitiveType.Polygon);
 			GL.Vertex2(0.90, 0.50);
 			GL.Vertex2(0.50, 0.90);
 			GL.Vertex2(0.10, 0.50);
 			GL.Vertex2(0.50, 0.10);
 			GL.End();
-			GL.Color3(Color.White);                      // set rectangle color
-			GL.Rect(0.25, 0.25, 0.75, 0.75);            // draw the rectangle
+			GL.Color3(Color.White);
+			GL.Rect(0.25, 0.25, 0.75, 0.75);
 		}
 
-		void RenderBox(float time)
-		{
+        void RenderBox(float time)
+        {
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.LoadIdentity();
-			//GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
-			//GL.MatrixMode(MatrixMode.Modelview);
-			//GL.LoadIdentity();
-
 			//GL.Enable(EnableCap.Lighting);
-
 			GL.Disable(EnableCap.DepthTest);
 			GL.Enable(EnableCap.Blend);
 			GL.Enable(EnableCap.Texture2D);
 
+			GL.PushMatrix();
+			GL.Translate (-0.5, -0.5, 0);
+            GL.CallList(boxListIndex);
+            GL.PopMatrix ();
+
+			GL.PushMatrix();
+			GL.Translate (-0.2, -0.3, 0);
+            GL.CallList(boxListIndex);
+            GL.PopMatrix ();
+
+			GL.PushMatrix();
+			GL.Translate (-0.6, -0.5, 0);
+            GL.CallList(boxListIndex);
+            GL.PopMatrix ();
+        }
+		int CompileBox()
+        {
+            int newList = GL.GenLists(1);
+            GL.NewList(newList, ListMode.Compile);
+
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
-			//GL.PushMatrix();
-
 			GL.Scale (0.1, 0.1, 0.1);
-			GL.Translate (-0.5, -0.5, 0);                          // Move To The Right Of The Character
 
-			//GL.NewList (boxList + loop1, ListMode.Compile);					// Start Building A List
 			//GL.Color3(Color.Red);
-			GL.Begin (PrimitiveType.Quads);								// Use A Quad For Each Character
-			GL.TexCoord2 (0,0);			// Texture Coord (Bottom Left)
-			GL.Vertex2 (-1, -1);							// Vertex Coord (Bottom Left)
-			GL.TexCoord2 (1,0);  // Texture Coord (Bottom Right)
-			GL.Vertex2 (1, -1);                         // Vertex Coord (Bottom Right)
-			GL.TexCoord2 (1,1);          // Texture Coord (Top Right)
-			GL.Vertex2 (1, 1);                          // Vertex Coord (Top Right)
-			GL.TexCoord2 (1,0);                  // Texture Coord (Top Left)
-			GL.Vertex2 (-1, 1);                           // Vertex Coord (Top Left)
-			GL.End ();                                       // Done Building Our Quad (Character)
+			GL.Begin (PrimitiveType.Quads);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-1f, -1f);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1f, -1f);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1f, 1f);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1f, 1f);
+            GL.End ();
 
-			//GL.PopMatrix ();
-		}
+            GL.EndList();
+            return newList;
+        }
 
-		void RenderCube(float time)
+        void RenderCube(float time)
 		{
-            GL.LoadIdentity();                                      // Reset The Projection Matrix
+            GL.LoadIdentity();
             GL.Ortho(0.0f, Width, Height, 0.0f, -1.0f, 1.0f);
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadIdentity();                                      // Reset The Modelview Matrix
+            GL.LoadIdentity();
 
    //         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, Width / (float)Height, 1.0f, 128.0f);
 			//Matrix4 modelview = Matrix4.LookAt(0, 3, 3, 0, 0, 0, 0, 1, 0);

@@ -8,6 +8,7 @@ namespace OpenTkClient
             using (TextRendering example = new TextRendering())
             {
                 //Utilities.SetWindowTitle(example);
+                Comms.Run();
                 example.Run(30.0);
             }
         }

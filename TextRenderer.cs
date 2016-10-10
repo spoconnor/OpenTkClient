@@ -16,8 +16,6 @@ namespace OpenTkClient
 		Rectangle dirty_region;
 		bool disposed;
 
-		#region Constructors
-
 		/// <summary>
 		/// Constructs a new instance.
 		/// </summary>
@@ -43,10 +41,6 @@ namespace OpenTkClient
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0,
 				PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
 		}
-
-		#endregion
-
-		#region Public Members
 
 		/// <summary>
 		/// Clears the backing store to the specified color.
@@ -89,10 +83,6 @@ namespace OpenTkClient
 			}
 		}
 
-		#endregion
-
-		#region Private Members
-
 		// Uploads the dirty regions of the backing store to the OpenGL texture.
 		void UploadBitmap()
 		{
@@ -112,8 +102,6 @@ namespace OpenTkClient
 				dirty_region = Rectangle.Empty;
 			}
 		}
-
-		#endregion
 
 		#region IDisposable Members
 
