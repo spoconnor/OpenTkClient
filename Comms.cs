@@ -60,7 +60,11 @@ namespace OpenTkClient
 
         public static void ProcessMessage(Guid clientId, Message msg)
         {
-            Console.WriteLine($"Processing response...");
+            Console.WriteLine($"Processing response... {msg.ToString()}");
+            if (msg.Map != null)
+            {
+                MapManager.AddChunk (msg);
+            }
         }
 
     }
