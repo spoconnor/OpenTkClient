@@ -10,6 +10,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
+using Sean.Shared;
 
 namespace OpenTkClient
 {
@@ -22,6 +23,7 @@ namespace OpenTkClient
 		float angle;
 		int blockTexture;
         int boxListIndex;
+        Position lookingAt = new Position(100, 0, 100);
 
 		public TextRendering()
 			: base(800, 600)
@@ -105,10 +107,33 @@ namespace OpenTkClient
 		{
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			//RenderCube((float)e.Time);
-			RenderGui();
-			RenderBox ((float)e.Time);
-			//RenderBox2 ();
+            //RenderCube((float)e.Time);
+            //RenderGui();
+            //RenderBox ((float)e.Time);
+            //RenderBox2 ();
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            //GL.Enable(EnableCap.Lighting);
+            GL.Disable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Texture2D);
+            foreach (var blockInfo in MapManager.GetBlocks())
+            {
+                var block = blockInfo.Item1;
+                var pos = blockInfo.Item2;
+
+                var x1 = lookingAt.X - pos.X;
+                var y1 = lookingAt.Y - pos.Y;
+                var z1 = lookingAt.Z - pos.Z;
+
+                var x2 = (x1 - z1) * 32;
+                var y2 = (y1 * 21) - (x1 + z1) * 16;
+
+                var x3 = x2 / (20 * 32);
+                var y3 = y2 / (20 * 32);
+                RenderBlock((float)e.Time, block,x3,y3);
+            }
 			SwapBuffers();
 		}
 
@@ -125,6 +150,14 @@ namespace OpenTkClient
 			GL.Color3(Color.White);
 			GL.Rect(0.25, 0.25, 0.75, 0.75);
 		}
+
+        void RenderBlock(float time, Block block, int x,int y)
+        {
+            GL.PushMatrix();
+            GL.Translate(x,y,0);
+            GL.CallList(boxListIndex);
+            GL.PopMatrix();
+        }
 
         void RenderBox(float time)
         {
