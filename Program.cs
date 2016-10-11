@@ -32,7 +32,6 @@ namespace OpenTkClient
 
 		protected override void OnLoad(EventArgs e)
 		{
-
             GL.ClearColor(Color.CornflowerBlue);
             GL.Ortho(0, 800, 600, 0, -1, 1);
             GL.Viewport(0, 0, 800, 600);
@@ -59,7 +58,6 @@ namespace OpenTkClient
             boxListIndex = CompileBox();
         }
 
-
 		private int LoadTexture()
 		{
 			int texture;
@@ -68,7 +66,7 @@ namespace OpenTkClient
 			GL.GenTextures(1, out texture);
 			GL.BindTexture(TextureTarget.Texture2D, texture);
 
-            bitmap.MakeTransparent(Color.Magenta);
+			//bitmap.MakeTransparent(Color.Black);
 
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                                               ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -114,29 +112,30 @@ namespace OpenTkClient
 
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
+			GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+			GL.MatrixMode(MatrixMode.Modelview);
+			GL.LoadIdentity();
             //GL.Enable(EnableCap.Lighting);
-            GL.Disable(EnableCap.DepthTest);
+			GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.Blend);
             GL.Enable(EnableCap.Texture2D);
             foreach (var blockInfo in MapManager.GetBlocks())
             {
                 var block = blockInfo.Item1;
                 var pos = blockInfo.Item2;
+					
+				float x1 = pos.X - lookingAt.X;
+				float y1 = pos.Y - lookingAt.Y;
+				float z1 = pos.Z - lookingAt.Z;
 
-                var x1 = lookingAt.X - pos.X;
-                var y1 = lookingAt.Y - pos.Y;
-                var z1 = lookingAt.Z - pos.Z;
+				var x2 = (x1 - z1) / 16.0f;
+				var y2 = -1.0f + (y1 / 10.5f) + (x1 + z1) / 16.0f;
+				var z2 = (y1 - (x1 + z1) * 128.0f) / (64.0f * 128.0f);
 
-                var x2 = (x1 - z1) * 32;
-                var y2 = (y1 * 21) - (x1 + z1) * 16;
-
-                var x3 = x2 / (20 * 32);
-                var y3 = y2 / (20 * 32);
-                RenderBlock((float)e.Time, block,x3,y3);
+                RenderBlock((float)e.Time, block,x2,y2,z2);
             }
 			SwapBuffers();
 		}
-
 
 		// draw diamond and rectangle
 		void RenderBox2() {
@@ -151,10 +150,10 @@ namespace OpenTkClient
 			GL.Rect(0.25, 0.25, 0.75, 0.75);
 		}
 
-        void RenderBlock(float time, Block block, int x,int y)
+		void RenderBlock(float time, Block block, float x, float y, float z)
         {
             GL.PushMatrix();
-            GL.Translate(x,y,0);
+            GL.Translate(x,y,z);
             GL.CallList(boxListIndex);
             GL.PopMatrix();
         }
@@ -183,11 +182,14 @@ namespace OpenTkClient
             GL.CallList(boxListIndex);
             GL.PopMatrix ();
         }
+
 		int CompileBox()
         {
             int newList = GL.GenLists(1);
             GL.NewList(newList, ListMode.Compile);
 
+			GL.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
@@ -296,7 +298,6 @@ namespace OpenTkClient
 			GL.Disable(EnableCap.Blend);
 			GL.Enable(EnableCap.DepthTest);
 		}
-
 
 	}
 }
