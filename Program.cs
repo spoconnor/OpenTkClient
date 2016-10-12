@@ -24,24 +24,59 @@ namespace OpenTkClient
 		int blockTexture;
         int boxListIndex;
         Position lookingAt = new Position(100, 0, 100);
+        float scale = 1.0f;
 
-		public TextRendering()
+        //int vbo;
+        //Vector3[,] vertices;
+        //float time = 0.01f;
+
+        public TextRendering()
 			: base(800, 600)
 		{
 		}
 
 		protected override void OnLoad(EventArgs e)
 		{
+
+            //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
+            //GL.LoadIdentity();                           // Reset Projection matrix
+            //GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // Set clipping area's left, right, bottom, top
+            //GL.Ortho(0, 800, 600, 0, -1, 1);             // Set clipping area's left, right, bottom, top
+            //GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
+            //GL.LoadIdentity();                           // Reset the Model View Matrix
+
+
+            //background color
             GL.ClearColor(Color.CornflowerBlue);
-            GL.Ortho(0, 800, 600, 0, -1, 1);
-            GL.Viewport(0, 0, 800, 600);
+            //GL.Ortho(0, 800, 600, 0, -1, 1);
+            //GL.Viewport(0, 0, 800, 600);
 
-            GL.Enable(EnableCap.Texture2D);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            //set the view area
+            //GL.MatrixMode(MatrixMode.Projection);
+            //GL.LoadIdentity();
+            //GL.Ortho(-2, 2, -2, 2, -2, 2);
 
+            //now back to 'scene editing' mode
+            //GL.MatrixMode(MatrixMode.Modelview);
+            //GL.LoadIdentity();
+
+            //make things look nice
+            GL.ShadeModel(ShadingModel.Smooth);
+
+            //set up our z-rendering logic
+            //GL.ClearDepth(1.0f);
+            GL.Disable(EnableCap.DepthTest);
+            //GL.Enable(EnableCap.DepthTest);
+            //GL.DepthFunc(DepthFunction.Lequal);
+            //GL.DepthMask(true);
+            //GL.ClearColor(Color.Black);
+
+            //other improvements to quality
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            GL.Hint(HintTarget.LineSmoothHint, HintMode.Nicest);
 
+            //initialize our scene data
+            //CreateVertexBuffer();
 
 			blockTexture = LoadTexture();
 			renderer = new TextRenderer(Width, Height);
@@ -58,7 +93,26 @@ namespace OpenTkClient
             boxListIndex = CompileBox();
         }
 
-		private int LoadTexture()
+        //void CreateVertexBuffer()
+        //{
+        //    vertices = new Vector3[2, 3];
+        //    vertices[0, 0] = new Vector3(-1f, -1f, (float)Math.Sin(time));
+        //    vertices[0, 1] = new Vector3(0.5f, -1f, (float)Math.Sin(time));
+        //    vertices[0, 2] = new Vector3(-0.25f, 1f, -(float)Math.Sin(time));
+        //    vertices[1, 0] = new Vector3(-0.5f, -1f, (float)Math.Cos(time));
+        //    vertices[1, 1] = new Vector3(1f, -1f, (float)Math.Cos(time));
+        //    vertices[1, 2] = new Vector3(0.25f, 1f, -(float)Math.Cos(time));
+
+        //    //MessageBox.Show("Length: " + vertices.Length.ToString());
+
+        //    GL.GenBuffers(1, out vbo);
+        //    GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+        //    GL.BufferData<Vector3>(BufferTarget.ArrayBuffer,
+        //                           new IntPtr(vertices.Length * Vector3.SizeInBytes),
+        //                           vertices, BufferUsageHint.StaticDraw);
+        //}
+
+        private int LoadTexture()
 		{
 			int texture;
 			Bitmap bitmap = new Bitmap("block.png");
@@ -103,22 +157,25 @@ namespace OpenTkClient
 
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            //RenderCube((float)e.Time);
+            
             //RenderGui();
-            //RenderBox ((float)e.Time);
-            //RenderBox2 ();
+            GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
+            GL.LoadIdentity();                           // Reset Projection matrix
+            //GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // Set clipping area's left, right, bottom, top
+            GL.Ortho(0, this.Width, 0, this.Height, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
+            GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
+            GL.LoadIdentity();                           // Reset the Model View Matrix
 
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-			GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
-			GL.MatrixMode(MatrixMode.Modelview);
-			GL.LoadIdentity();
             //GL.Enable(EnableCap.Lighting);
-			GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.Blend);
-            GL.Enable(EnableCap.Texture2D);
+            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
+            int midWidth = this.Width / 2;
+            int midHeight = this.Height / 2;
+            int sprXOffset = 32;
+            int sprYOffset = 15;
+            int sprHeight = 21;
             foreach (var blockInfo in MapManager.GetBlocks())
             {
                 var block = blockInfo.Item1;
@@ -128,27 +185,17 @@ namespace OpenTkClient
 				float y1 = pos.Y - lookingAt.Y;
 				float z1 = pos.Z - lookingAt.Z;
 
-				var x2 = (x1 - z1) / 16.0f;
-				var y2 = -1.0f + (y1 / 10.5f) + (x1 + z1) / 16.0f;
-				var z2 = (y1 - (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+                if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
-                RenderBlock((float)e.Time, block,x2,y2,z2);
+				var x2 = midWidth + (x1 - z1) * sprXOffset;
+				var y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
+				var z2 = (y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+
+                RenderBlock((float)e.Time, block, x2, y2, z2);
             }
 			SwapBuffers();
 		}
 
-		// draw diamond and rectangle
-		void RenderBox2() {
-			GL.Color3(Color.Blue);
-			GL.Begin(PrimitiveType.Polygon);
-			GL.Vertex2(0.90, 0.50);
-			GL.Vertex2(0.50, 0.90);
-			GL.Vertex2(0.10, 0.50);
-			GL.Vertex2(0.50, 0.10);
-			GL.End();
-			GL.Color3(Color.White);
-			GL.Rect(0.25, 0.25, 0.75, 0.75);
-		}
 
 		void RenderBlock(float time, Block block, float x, float y, float z)
         {
@@ -156,31 +203,6 @@ namespace OpenTkClient
             GL.Translate(x,y,z);
             GL.CallList(boxListIndex);
             GL.PopMatrix();
-        }
-
-        void RenderBox(float time)
-        {
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadIdentity();
-			//GL.Enable(EnableCap.Lighting);
-			GL.Disable(EnableCap.DepthTest);
-			GL.Enable(EnableCap.Blend);
-			GL.Enable(EnableCap.Texture2D);
-
-			GL.PushMatrix();
-			GL.Translate (-0.5, -0.5, 0);
-            GL.CallList(boxListIndex);
-            GL.PopMatrix ();
-
-			GL.PushMatrix();
-			GL.Translate (-0.2, -0.3, 0);
-            GL.CallList(boxListIndex);
-            GL.PopMatrix ();
-
-			GL.PushMatrix();
-			GL.Translate (-0.6, -0.5, 0);
-            GL.CallList(boxListIndex);
-            GL.PopMatrix ();
         }
 
 		int CompileBox()
@@ -193,81 +215,18 @@ namespace OpenTkClient
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
-			GL.Scale (0.1, 0.1, 0.1);
-
-			//GL.Color3(Color.Red);
+            //GL.Scale (0.1, 0.1, 1.0);
+            float sprSize = 32;
 			GL.Begin (PrimitiveType.Quads);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-1f, -1f);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(1f, -1f);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1f, 1f);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1f, 1f);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-sprSize, -sprSize);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(sprSize, -sprSize);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(sprSize, sprSize);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-sprSize, sprSize);
             GL.End ();
 
             GL.EndList();
             return newList;
         }
-
-        void RenderCube(float time)
-		{
-            GL.LoadIdentity();
-            GL.Ortho(0.0f, Width, Height, 0.0f, -1.0f, 1.0f);
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadIdentity();
-
-   //         Matrix4 projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.PiOver2, Width / (float)Height, 1.0f, 128.0f);
-			//Matrix4 modelview = Matrix4.LookAt(0, 3, 3, 0, 0, 0, 0, 1, 0);
-
-			//GL.MatrixMode(MatrixMode.Projection);
-   //         GL.MatrixMode(MatrixMode.Modelview);
-			//GL.LoadMatrix(ref projection);
-
-			GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
-			angle +=  time * 100;
-
-			GL.Enable(EnableCap.DepthTest);
-
-			GL.Begin(BeginMode.Quads);
-
-			GL.Color3(Color.Red);
-			GL.Vertex3(-1.0f, -1.0f, -1.0f);
-			GL.Vertex3(-1.0f, 1.0f, -1.0f);
-			GL.Vertex3(1.0f, 1.0f, -1.0f);
-			GL.Vertex3(1.0f, -1.0f, -1.0f);
-
-			GL.Color3(Color.Green);
-			GL.Vertex3(-1.0f, -1.0f, -1.0f);
-			GL.Vertex3(1.0f, -1.0f, -1.0f);
-			GL.Vertex3(1.0f, -1.0f, 1.0f);
-			GL.Vertex3(-1.0f, -1.0f, 1.0f);
-
-			GL.Color3(Color.Blue);
-			GL.Vertex3(-1.0f, -1.0f, -1.0f);
-			GL.Vertex3(-1.0f, -1.0f, 1.0f);
-			GL.Vertex3(-1.0f, 1.0f, 1.0f);
-			GL.Vertex3(-1.0f, 1.0f, -1.0f);
-
-			GL.Color3(Color.Yellow);
-			GL.Vertex3(-1.0f, -1.0f, 1.0f);
-			GL.Vertex3(1.0f, -1.0f, 1.0f);
-			GL.Vertex3(1.0f, 1.0f, 1.0f);
-			GL.Vertex3(-1.0f, 1.0f, 1.0f);
-
-			GL.Color3(Color.Magenta);
-			GL.Vertex3(-1.0f, 1.0f, -1.0f);
-			GL.Vertex3(-1.0f, 1.0f, 1.0f);
-			GL.Vertex3(1.0f, 1.0f, 1.0f);
-			GL.Vertex3(1.0f, 1.0f, -1.0f);
-
-			GL.Color3(Color.Violet);
-			GL.Vertex3(1.0f, -1.0f, -1.0f);
-			GL.Vertex3(1.0f, 1.0f, -1.0f);
-			GL.Vertex3(1.0f, 1.0f, 1.0f);
-			GL.Vertex3(1.0f, -1.0f, 1.0f);
-
-			GL.End();
-
-			GL.Disable(EnableCap.DepthTest);
-		}
 
 		void RenderGui()
 		{

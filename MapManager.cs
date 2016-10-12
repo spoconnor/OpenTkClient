@@ -22,9 +22,9 @@ namespace OpenTkClient
         {
             foreach (var chunk in chunks.GetChunks())
             {
-                for (var x = 0; x < CHUNK_SIZE; x++)
+                for (var x = CHUNK_SIZE-1; x >= 0; x--)
                 {
-                    for (var z = 0; z < CHUNK_SIZE; z++)
+                    for (var z = CHUNK_SIZE-1; z >= 0; z--)
                     {
                         for (var y = 0; y < CHUNK_HEIGHT; y++)
                         {
