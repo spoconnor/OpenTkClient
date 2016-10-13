@@ -18,20 +18,13 @@ namespace OpenTkClient
             chunks.Add (coords, chunk);
         }
 
-        public static IEnumerable<Tuple<Block,Position>> GetBlocks()
+        public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks()
         {
             foreach (var chunk in chunks.GetChunks())
             {
-                for (var x = CHUNK_SIZE-1; x >= 0; x--)
-                {
-                    for (var z = CHUNK_SIZE-1; z >= 0; z--)
-                    {
-                        for (var y = 0; y < CHUNK_HEIGHT; y++)
-                        {
-                            var block = chunk.Blocks[x, y, z];
-                            yield return new Tuple<Block, Position>(block, new Position(chunk.MinPosition.X + x, chunk.MinPosition.Y + y, chunk.MinPosition.Z + z));
-                        }
-                    }
+				foreach (var item in chunk.Blocks.GetVisibleIterator())
+				{
+					yield return item;
                 }
             }
         }

@@ -178,26 +178,26 @@ namespace OpenTkClient
             int sprHeight = 21;
             foreach (var blockInfo in MapManager.GetBlocks())
             {
-                var block = blockInfo.Item1;
-                var pos = blockInfo.Item2;
+				var pos = blockInfo.Item1;
+				var blockType = blockInfo.Item2;
 					
 				float x1 = pos.X - lookingAt.X;
 				float y1 = pos.Y - lookingAt.Y;
 				float z1 = pos.Z - lookingAt.Z;
 
-                if (y1 > 1 || x1 > 5 || z1 > 5) continue;
+                //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
 				var x2 = midWidth + (x1 - z1) * sprXOffset;
 				var y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
 				var z2 = (y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
 
-                RenderBlock((float)e.Time, block, x2, y2, z2);
+                RenderBlock((float)e.Time, blockType, x2, y2, z2);
             }
 			SwapBuffers();
 		}
 
 
-		void RenderBlock(float time, Block block, float x, float y, float z)
+		void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
         {
             GL.PushMatrix();
             GL.Translate(x,y,z);
