@@ -45,9 +45,26 @@ namespace OpenTkClient
                 {
                     MapRequest = new MapRequestMessage()
                     {
-                        Coords = new Sean.Shared.ChunkCoords(100, 100)
+                        Coords = new Sean.Shared.ChunkCoords(200, 100) // TODO - put this somewhere
                     }
                 });
+                System.Threading.Thread.Sleep (10000);
+                ClientConnection.BroadcastMessage(new Message()
+                {
+                    MapRequest = new MapRequestMessage()
+                    {
+                        Coords = new Sean.Shared.ChunkCoords(201, 100) // TODO - put this somewhere
+                    }
+                });
+                System.Threading.Thread.Sleep (10000);
+                ClientConnection.BroadcastMessage(new Message()
+                {
+                    MapRequest = new MapRequestMessage()
+                    {
+                        Coords = new Sean.Shared.ChunkCoords(200, 101) // TODO - put this somewhere
+                    }
+                });
+
 
                 Console.WriteLine("Press any key to exit");
                 Console.ReadKey();

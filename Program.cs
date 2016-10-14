@@ -23,7 +23,7 @@ namespace OpenTkClient
 		float angle;
 		int blockTexture;
         int boxListIndex;
-        Position lookingAt = new Position(100, 100, 100);
+        Position lookingAt = new Position(200, 100, 100); // TODO - duplicated. put somewhere
         float scale = 4.0f;
 
         //int vbo;
