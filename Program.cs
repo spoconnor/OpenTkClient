@@ -23,7 +23,8 @@ namespace OpenTkClient
 		float angle;
 		int blockTexture;
         int boxListIndex;
-        Position lookingAt = new Position(200, 100, 100); // TODO - duplicated. put somewhere
+		public const int CHUNK_SIZE = 32; // TODO - move
+        Position lookingAt = new Position(2000, 100, 1000); // TODO - duplicated. put somewhere
         float scale = 4.0f;
 
         //int vbo;
@@ -37,7 +38,6 @@ namespace OpenTkClient
 
 		protected override void OnLoad(EventArgs e)
 		{
-
             //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             //GL.LoadIdentity();                           // Reset Projection matrix
             //GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // Set clipping area's left, right, bottom, top

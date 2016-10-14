@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Sean.Shared;
 
 namespace OpenTkClient
 {
@@ -41,11 +42,16 @@ namespace OpenTkClient
                     }
                 });
 
+				int CHUNK_SIZE = 32; // TODO - move
+				Position lookingAt = new Position(2000, 100, 1000);  // TODO - duplicate put this somewhere
+				int x = lookingAt.X / CHUNK_SIZE;
+				int z = lookingAt.Z / CHUNK_SIZE;
+
                 ClientConnection.BroadcastMessage(new Message()
                 {
                     MapRequest = new MapRequestMessage()
                     {
-                        Coords = new Sean.Shared.ChunkCoords(200, 100) // TODO - put this somewhere
+							Coords = new Sean.Shared.ChunkCoords(x,z)
                     }
                 });
                 System.Threading.Thread.Sleep (10000);
@@ -53,7 +59,7 @@ namespace OpenTkClient
                 {
                     MapRequest = new MapRequestMessage()
                     {
-                        Coords = new Sean.Shared.ChunkCoords(201, 100) // TODO - put this somewhere
+							Coords = new Sean.Shared.ChunkCoords(x+1,z)
                     }
                 });
                 System.Threading.Thread.Sleep (10000);
@@ -61,7 +67,7 @@ namespace OpenTkClient
                 {
                     MapRequest = new MapRequestMessage()
                     {
-                        Coords = new Sean.Shared.ChunkCoords(200, 101) // TODO - put this somewhere
+							Coords = new Sean.Shared.ChunkCoords(x,z+1)
                     }
                 });
 
