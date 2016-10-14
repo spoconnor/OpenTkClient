@@ -23,8 +23,8 @@ namespace OpenTkClient
 		float angle;
 		int blockTexture;
         int boxListIndex;
-        Position lookingAt = new Position(100, 0, 100);
-        float scale = 1.0f;
+        Position lookingAt = new Position(100, 100, 100);
+        float scale = 4.0f;
 
         //int vbo;
         //Vector3[,] vertices;
@@ -162,7 +162,7 @@ namespace OpenTkClient
             GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             GL.LoadIdentity();                           // Reset Projection matrix
             //GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // Set clipping area's left, right, bottom, top
-            GL.Ortho(0, this.Width, 0, this.Height, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
+            GL.Ortho(0, this.Width * scale, 0, this.Height * scale, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
             GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
             GL.LoadIdentity();                           // Reset the Model View Matrix
 
@@ -171,8 +171,8 @@ namespace OpenTkClient
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-            int midWidth = this.Width / 2;
-            int midHeight = this.Height / 2;
+            int midWidth = (int)(this.Width * scale / 2);
+            int midHeight = (int)(this.Height * scale / 2);
             int sprXOffset = 32;
             int sprYOffset = 15;
             int sprHeight = 21;
@@ -191,6 +191,7 @@ namespace OpenTkClient
 				var y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
 				var z2 = (y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
 
+                //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
                 RenderBlock((float)e.Time, blockType, x2, y2, z2);
             }
 			SwapBuffers();
