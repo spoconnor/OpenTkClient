@@ -7,8 +7,6 @@ namespace OpenTkClient
     public static class MapManager
     {
         private static Chunks chunks = new Chunks ();
-        public const int CHUNK_SIZE = 32; // TODO - move
-        public const int CHUNK_HEIGHT = 128; // TODO - move
 
         public static void AddChunk(Sean.Shared.Comms.Message msg)
         {

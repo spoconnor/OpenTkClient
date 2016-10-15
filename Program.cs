@@ -11,6 +11,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
 using Sean.Shared;
+using OpenTK.Input;
 
 namespace OpenTkClient
 {
@@ -23,13 +24,6 @@ namespace OpenTkClient
 		float angle;
 		int blockTexture;
         int boxListIndex;
-		public const int CHUNK_SIZE = 32; // TODO - move
-        Position lookingAt = new Position(2000, 100, 1000); // TODO - duplicated. put somewhere
-        float scale = 4.0f;
-
-        //int vbo;
-        //Vector3[,] vertices;
-        //float time = 0.01f;
 
         public TextRendering()
 			: base(800, 600)
@@ -44,7 +38,6 @@ namespace OpenTkClient
             //GL.Ortho(0, 800, 600, 0, -1, 1);             // Set clipping area's left, right, bottom, top
             //GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
             //GL.LoadIdentity();                           // Reset the Model View Matrix
-
 
             //background color
             GL.ClearColor(Color.CornflowerBlue);
@@ -149,20 +142,32 @@ namespace OpenTkClient
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{
+			
 			if (Keyboard[OpenTK.Input.Key.Escape])
 			{
 				this.Exit();
 			}
+
+			KeyboardState keyState = Keyboard.GetState();
+
+			if (keyState.IsKeyDown (Key.A)) {
+				Global.LookingAt.X--;
+			} else if (keyState.IsKeyDown (Key.D)) {
+				Global.LookingAt.X++;
+			} else if (keyState.IsKeyDown (Key.W)) {
+				Global.LookingAt.Z++;
+			} else if (keyState.IsKeyDown (Key.S)) {
+				Global.LookingAt.Z--;
+			}
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
-		{
-            
+		{            
             //RenderGui();
             GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             GL.LoadIdentity();                           // Reset Projection matrix
             //GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // Set clipping area's left, right, bottom, top
-            GL.Ortho(0, this.Width * scale, 0, this.Height * scale, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
+			GL.Ortho(0, this.Width * Global.Scale, 0, this.Height * Global.Scale, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
             GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
             GL.LoadIdentity();                           // Reset the Model View Matrix
 
@@ -171,8 +176,8 @@ namespace OpenTkClient
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-            int midWidth = (int)(this.Width * scale / 2);
-            int midHeight = (int)(this.Height * scale / 2);
+			int midWidth = (int)(this.Width * Global.Scale / 2);
+			int midHeight = (int)(this.Height * Global.Scale / 2);
             int sprXOffset = 32;
             int sprYOffset = 15;
             int sprHeight = 21;
@@ -181,22 +186,21 @@ namespace OpenTkClient
 				var pos = blockInfo.Item1;
 				var blockType = blockInfo.Item2;
 					
-				float x1 = pos.X - lookingAt.X;
-				float y1 = pos.Y - lookingAt.Y;
-				float z1 = pos.Z - lookingAt.Z;
+				float x1 = pos.X - Global.LookingAt.X;
+				float y1 = pos.Y - Global.LookingAt.Y;
+				float z1 = pos.Z - Global.LookingAt.Z;
 
                 //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
 				var x2 = midWidth + (x1 - z1) * sprXOffset;
 				var y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
-				var z2 = (y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+				var z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
                 RenderBlock((float)e.Time, blockType, x2, y2, z2);
             }
 			SwapBuffers();
 		}
-
 
 		void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
         {

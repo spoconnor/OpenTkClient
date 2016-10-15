@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using Sean.Shared;
+using System.Collections.Generic;
 
 namespace OpenTkClient
 {
@@ -42,36 +43,27 @@ namespace OpenTkClient
                     }
                 });
 
-				int CHUNK_SIZE = 32; // TODO - move
-				Position lookingAt = new Position(2000, 100, 1000);  // TODO - duplicate put this somewhere
-				int x = lookingAt.X / CHUNK_SIZE;
-				int z = lookingAt.Z / CHUNK_SIZE;
-
-                ClientConnection.BroadcastMessage(new Message()
-                {
-                    MapRequest = new MapRequestMessage()
-                    {
-							Coords = new Sean.Shared.ChunkCoords(x,z)
-                    }
-                });
-                System.Threading.Thread.Sleep (10000);
-                ClientConnection.BroadcastMessage(new Message()
-                {
-                    MapRequest = new MapRequestMessage()
-                    {
-							Coords = new Sean.Shared.ChunkCoords(x+1,z)
-                    }
-                });
-                System.Threading.Thread.Sleep (10000);
-                ClientConnection.BroadcastMessage(new Message()
-                {
-                    MapRequest = new MapRequestMessage()
-                    {
-							Coords = new Sean.Shared.ChunkCoords(x,z+1)
-                    }
-                });
-
-
+				 
+				List<string> sent = new List<string>();
+				while(true)
+				{
+					int x = Global.LookingAt.X / Global.CHUNK_SIZE;
+					int z = Global.LookingAt.Z / Global.CHUNK_SIZE;
+					string hash = $"{x},{z}";
+					if (!sent.Contains(hash))
+					{
+						sent.Add(hash);
+						ClientConnection.BroadcastMessage(new Message()
+						{
+							MapRequest = new MapRequestMessage()
+							{
+								Coords = new Sean.Shared.ChunkCoords(x,z)
+							}
+						});
+						}
+					System.Threading.Thread.Sleep (2000);
+				}
+			
                 Console.WriteLine("Press any key to exit");
                 Console.ReadKey();
             }
