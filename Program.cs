@@ -3,11 +3,8 @@
 // It is provided "as is" without express or implied warranty of any kind.
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
 using Sean.Shared;

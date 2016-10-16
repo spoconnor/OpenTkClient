@@ -43,7 +43,12 @@ namespace OpenTkClient
                     }
                 });
 
-				 
+		        Thread.Sleep (2000);
+                ClientConnection.BroadcastMessage(new Message()
+                {
+                    WorldMapRequest = new WorldMapRequestMessage()
+                });
+        
 				List<string> sent = new List<string>();
 				while(true)
 				{
@@ -57,11 +62,11 @@ namespace OpenTkClient
 						{
 							MapRequest = new MapRequestMessage()
 							{
-								Coords = new Sean.Shared.ChunkCoords(x,z)
+								Coords = new ChunkCoords(x,z)
 							}
 						});
 						}
-					System.Threading.Thread.Sleep (2000);
+					Thread.Sleep (2000);
 				}
 			
                 Console.WriteLine("Press any key to exit");
@@ -79,6 +84,10 @@ namespace OpenTkClient
             if (msg.Map != null)
             {
                 MapManager.AddChunk (msg);
+            }
+            if (msg.WorldMapResponse != null)
+            {
+                MapManager.SetWorldMap(msg);
             }
         }
 

@@ -8,6 +8,22 @@ namespace OpenTkClient
     {
         private static Chunks chunks = new Chunks ();
 
+        public static void SetWorldMap(Sean.Shared.Comms.Message msg)
+        {
+            var size = new ArraySize()
+            {
+                scale = msg.WorldMapResponse.Scale,
+                minX = msg.WorldMapResponse.MinPosition.X,
+                minY = msg.WorldMapResponse.MinPosition.Y,
+                minZ = msg.WorldMapResponse.MinPosition.Z,
+                maxX = msg.WorldMapResponse.MaxPosition.X,
+                maxY = msg.WorldMapResponse.MaxPosition.Y,
+                maxZ = msg.WorldMapResponse.MaxPosition.Z,
+            };
+            Array<int> map = new Array<int>(size);
+            map.DeSerialize(msg.Data);
+        }
+
         public static void AddChunk(Sean.Shared.Comms.Message msg)
         {
             var position = msg.Map.MinPosition;
