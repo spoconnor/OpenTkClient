@@ -175,9 +175,9 @@ namespace OpenTkClient
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
 			int midWidth = (int)(this.Width * Global.Scale / 2);
 			int midHeight = (int)(this.Height * Global.Scale / 2);
-            int sprXOffset = 8;
-            int sprYOffset = 5;
-            int sprHeight = 6;
+            int sprXOffset = 16;
+            int sprYOffset = 8;
+            int sprHeight = 16;
             foreach (var blockInfo in MapManager.GetBlocks())
             {
 				var pos = blockInfo.Item1;
@@ -218,12 +218,12 @@ namespace OpenTkClient
 			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
             //GL.Scale (0.1, 0.1, 1.0);
-            float sprSize = 16;
+            float halfSprSize = 16;
 			GL.Begin (PrimitiveType.Quads);
-            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-sprSize, -sprSize);
-            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(sprSize, -sprSize);
-            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(sprSize, sprSize);
-            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-sprSize, sprSize);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-halfSprSize, -halfSprSize);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(halfSprSize, -halfSprSize);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(halfSprSize, halfSprSize);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-halfSprSize, halfSprSize);
             GL.End ();
 
             GL.EndList();
