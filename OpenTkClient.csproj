@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="block.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 </Project>

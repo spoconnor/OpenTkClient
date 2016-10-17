@@ -10,6 +10,7 @@ namespace OpenTkClient
 
         public static void SetWorldMap(Sean.Shared.Comms.Message msg)
         {
+            /*
             var size = new ArraySize()
             {
                 scale = msg.WorldMapResponse.Scale,
@@ -22,6 +23,7 @@ namespace OpenTkClient
             };
             Array<int> map = new Array<int>(size);
             map.DeSerialize(msg.Data);
+            */
         }
 
         public static void AddChunk(Sean.Shared.Comms.Message msg)
