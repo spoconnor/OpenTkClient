@@ -155,6 +155,14 @@ namespace OpenTkClient
 				Global.LookingAt.Z++;
 			} else if (keyState.IsKeyDown (Key.S)) {
 				Global.LookingAt.Z--;
+			} else if (keyState.IsKeyDown (Key.Number1)) {
+				Global.Direction = Facing.North;
+			} else if (keyState.IsKeyDown (Key.Number2)) {
+				Global.Direction = Facing.East;
+			} else if (keyState.IsKeyDown (Key.Number3)) {
+				Global.Direction = Facing.South;
+			} else if (keyState.IsKeyDown (Key.Number4)) {
+				Global.Direction = Facing.West;
 			}
 		}
 
@@ -178,7 +186,7 @@ namespace OpenTkClient
             int sprXOffset = 16;
             int sprYOffset = 8;
             int sprHeight = 16;
-            foreach (var blockInfo in MapManager.GetBlocks())
+			foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
 				var pos = blockInfo.Item1;
 				var blockType = blockInfo.Item2;
@@ -187,6 +195,21 @@ namespace OpenTkClient
 				float y1 = pos.Y - Global.LookingAt.Y;
 				float z1 = pos.Z - Global.LookingAt.Z;
 
+				switch (Global.Direction) 
+				{
+				case Facing.North:
+					x1 = Global.CHUNK_SIZE - x1;
+					z1 = Global.CHUNK_SIZE - z1;
+					break;
+				case Facing.South:
+					break;
+				case Facing.East:
+					x1 = Global.CHUNK_SIZE - x1;
+					break;
+				case Facing.West:
+					z1 = Global.CHUNK_SIZE - z1;
+					break;
+				}
                 //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
 				var x2 = midWidth + (x1 - z1) * sprXOffset;

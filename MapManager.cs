@@ -7,7 +7,11 @@ namespace OpenTkClient
     public static class MapManager
     {
         //private static Chunks chunks = new Chunks ();
-		private static SortedList<ChunkCoords, Chunk> _chunks = new SortedList<ChunkCoords, Chunk>();
+		private static SortedList<ChunkCoords, Chunk> _chunksN = new SortedList<ChunkCoords, Chunk>();
+		private static SortedList<ChunkCoords, Chunk> _chunksS = new SortedList<ChunkCoords, Chunk>();
+		private static SortedList<ChunkCoords, Chunk> _chunksE = new SortedList<ChunkCoords, Chunk>();
+		private static SortedList<ChunkCoords, Chunk> _chunksW = new SortedList<ChunkCoords, Chunk>();
+
 		private static object _lock = new object ();
 
         public static void SetWorldMap(Sean.Shared.Comms.Message msg)
@@ -34,15 +38,18 @@ namespace OpenTkClient
 				var position = msg.Map.MinPosition;
 				var coords = new ChunkCoords (ref position);
 				var chunk = Sean.Shared.Chunk.Deserialize (coords, msg.Data);
-				_chunks.Add (coords, chunk);
+				_chunksN.Add (coords, chunk);
+				_chunksS.Add (new ChunkCoords(Global.MaxChunkLimit - position.X, Global.MaxChunkLimit - position.Z), chunk);
+				_chunksE.Add (new ChunkCoords(Global.MaxChunkLimit - position.X, position.Z), chunk);
+				_chunksW.Add (new ChunkCoords(position.X, Global.MaxChunkLimit - position.Z), chunk);
 			}
         }
 
-        public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks()
+		public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks(Facing direction)
         {
 			lock (_lock) {
-				foreach (var chunk in _chunks) {
-					foreach (var item in chunk.Value.GetVisibleIterator()) {
+				foreach (var chunk in _chunksN) {
+					foreach (var item in chunk.Value.GetVisibleIterator(direction)) {
 						yield return item;
 					}
 				}

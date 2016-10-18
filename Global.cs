@@ -9,6 +9,8 @@ namespace OpenTkClient
 		public const int CHUNK_HEIGHT = 128;
 		public const float Scale = 2.0f;
 		public static Position LookingAt = new Position(2000, 30, 900);
+		public static Facing Direction;
+		public static int MaxChunkLimit = (int)Math.Sqrt(int.MaxValue);
 	}
 }
 

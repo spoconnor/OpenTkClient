@@ -24,8 +24,8 @@ namespace OpenTkClient
 
             try
             {
-                //IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
-				IPHostEntry ipHostInfo = Dns.Resolve("zen");
+                IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
+				//IPHostEntry ipHostInfo = Dns.Resolve("zen");
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 8084);
 
