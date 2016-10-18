@@ -5,7 +5,7 @@ namespace OpenTkClient
     {
         public static void Main()
         {
-            using (TextRendering example = new TextRendering())
+            using (GameRenderer example = new GameRenderer())
             {
                 //Utilities.SetWindowTitle(example);
                 Comms.Run();

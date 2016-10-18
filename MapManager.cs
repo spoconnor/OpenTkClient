@@ -6,7 +6,9 @@ namespace OpenTkClient
 {
     public static class MapManager
     {
-        private static Chunks chunks = new Chunks ();
+        //private static Chunks chunks = new Chunks ();
+		private static SortedList<ChunkCoords, Chunk> _chunks = new SortedList<ChunkCoords, Chunk>();
+		private static object _lock = new object ();
 
         public static void SetWorldMap(Sean.Shared.Comms.Message msg)
         {
@@ -28,21 +30,23 @@ namespace OpenTkClient
 
         public static void AddChunk(Sean.Shared.Comms.Message msg)
         {
-            var position = msg.Map.MinPosition;
-            var coords = new ChunkCoords (ref position);
-            var chunk = Sean.Shared.Chunk.Deserialize (coords, msg.Data);
-            chunks.Add (coords, chunk);
+			lock (_lock) {
+				var position = msg.Map.MinPosition;
+				var coords = new ChunkCoords (ref position);
+				var chunk = Sean.Shared.Chunk.Deserialize (coords, msg.Data);
+				_chunks.Add (coords, chunk);
+			}
         }
 
         public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks()
         {
-            foreach (var chunk in chunks.GetChunks())
-            {
-				foreach (var item in chunk.GetVisibleIterator())
-				{
-					yield return item;
-                }
-            }
+			lock (_lock) {
+				foreach (var chunk in _chunks) {
+					foreach (var item in chunk.Value.GetVisibleIterator()) {
+						yield return item;
+					}
+				}
+			}
         }
     }
 }

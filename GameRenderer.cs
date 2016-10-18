@@ -12,7 +12,7 @@ using OpenTK.Input;
 
 namespace OpenTkClient
 {
-	class TextRendering : GameWindow
+	class GameRenderer : GameWindow
 	{
 		TextRenderer renderer;
 		Font serif = new Font(FontFamily.GenericSerif, 24);
@@ -22,7 +22,7 @@ namespace OpenTkClient
 		int blockTexture;
         int boxListIndex;
 
-        public TextRendering()
+        public GameRenderer()
 			: base(800, 600)
 		{
 		}

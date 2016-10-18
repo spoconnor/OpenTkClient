@@ -45,13 +45,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comms.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TextRenderer.cs" />
     <Compile Include="Test.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MapManager.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="GameRenderer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

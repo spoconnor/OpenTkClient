@@ -24,7 +24,8 @@ namespace OpenTkClient
 
             try
             {
-                IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
+                //IPHostEntry ipHostInfo = Dns.Resolve(Dns.GetHostName());
+				IPHostEntry ipHostInfo = Dns.Resolve("zen");
                 IPAddress ipAddress = ipHostInfo.AddressList[0];
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, 8084);
 
@@ -44,10 +45,10 @@ namespace OpenTkClient
                 });
 
 		        Thread.Sleep (2000);
-                ClientConnection.BroadcastMessage(new Message()
-                {
-                    WorldMapRequest = new WorldMapRequestMessage()
-                });
+                //ClientConnection.BroadcastMessage(new Message()
+                //{
+                //    WorldMapRequest = new WorldMapRequestMessage()
+                //});
         
 				List<string> sent = new List<string>();
 				while(true)
