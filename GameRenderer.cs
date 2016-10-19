@@ -138,8 +138,7 @@ namespace OpenTkClient
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
-		{
-			
+		{			
 			if (Keyboard[OpenTK.Input.Key.Escape])
 			{
 				this.Exit();
@@ -147,15 +146,17 @@ namespace OpenTkClient
 
 			KeyboardState keyState = Keyboard.GetState();
 
-			if (keyState.IsKeyDown (Key.A)) {
+			if (keyState.IsKeyDown (Key.Q)) {
 				Global.LookingAt.X--;
-			} else if (keyState.IsKeyDown (Key.D)) {
+			} else if (keyState.IsKeyDown (Key.S)) {
 				Global.LookingAt.X++;
 			} else if (keyState.IsKeyDown (Key.W)) {
 				Global.LookingAt.Z++;
-			} else if (keyState.IsKeyDown (Key.S)) {
+			} else if (keyState.IsKeyDown (Key.A)) {
 				Global.LookingAt.Z--;
-			} else if (keyState.IsKeyDown (Key.Number1)) {
+			} 
+
+			if (keyState.IsKeyDown (Key.Number1)) {
 				Global.Direction = Facing.North;
 			} else if (keyState.IsKeyDown (Key.Number2)) {
 				Global.Direction = Facing.East;
@@ -208,14 +209,14 @@ namespace OpenTkClient
                         x2 = midWidth + (x1 - z1) * sprXOffset;
 				        y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
                         break;
-                    case Facing.West:
-                        x2 = midWidth + (- x1 - z1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (- x1 + z1) * sprYOffset;
-                        break;
                     case Facing.East:
-                        x2 = midWidth + (x1 + z1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
+                        x2 = midWidth + (- x1 - z1) * sprXOffset;
+						y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
                         break;
+                    case Facing.West:
+                        x2 = midWidth + (x1 + z1) * sprXOffset;
+						y2 = midHeight + (y1 * sprHeight) + (- x1 + z1) * sprYOffset;
+						break;
                 }
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");

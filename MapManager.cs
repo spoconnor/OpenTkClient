@@ -48,7 +48,22 @@ namespace OpenTkClient
 		public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks(Facing direction)
         {
 			lock (_lock) {
-				foreach (var chunk in _chunksN) {
+				var list = _chunksN;
+				switch (direction) {
+				case Facing.North:
+					list = _chunksN;
+					break;
+				case Facing.East:
+					list = _chunksE;
+					break;
+				case Facing.South:
+					list = _chunksS;
+					break;
+				case Facing.West:
+					list = _chunksW;
+					break;
+				}
+				foreach (var chunk in list) {
 					foreach (var item in chunk.Value.GetVisibleIterator(direction)) {
 						yield return item;
 					}
