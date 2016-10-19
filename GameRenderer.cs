@@ -195,26 +195,28 @@ namespace OpenTkClient
 				float y1 = pos.Y - Global.LookingAt.Y;
 				float z1 = pos.Z - Global.LookingAt.Z;
 
-				switch (Global.Direction) 
-				{
-				case Facing.North:
-					x1 = Global.CHUNK_SIZE - x1;
-					z1 = Global.CHUNK_SIZE - z1;
-					break;
-				case Facing.South:
-					break;
-				case Facing.East:
-					x1 = Global.CHUNK_SIZE - x1;
-					break;
-				case Facing.West:
-					z1 = Global.CHUNK_SIZE - z1;
-					break;
-				}
                 //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
-				var x2 = midWidth + (x1 - z1) * sprXOffset;
-				var y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
-				var z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+                float x2 = 0.0f,y2 = 0.0f,z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+                switch (Global.Direction)
+                {
+                    case Facing.North:
+                        x2 = midWidth + (z1 - x1) * sprXOffset;
+				        y2 = midHeight + (y1 * sprHeight) + (- x1 - z1) * sprYOffset;
+                        break;
+                    case Facing.South:
+                        x2 = midWidth + (x1 - z1) * sprXOffset;
+				        y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
+                        break;
+                    case Facing.West:
+                        x2 = midWidth + (- x1 - z1) * sprXOffset;
+				        y2 = midHeight + (y1 * sprHeight) + (- x1 + z1) * sprYOffset;
+                        break;
+                    case Facing.East:
+                        x2 = midWidth + (x1 + z1) * sprXOffset;
+				        y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
+                        break;
+                }
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
                 RenderBlock((float)e.Time, blockType, x2, y2, z2);
