@@ -146,13 +146,13 @@ namespace OpenTkClient
 
 			KeyboardState keyState = Keyboard.GetState();
 
-			if (keyState.IsKeyDown (Key.Q)) {
+			if (keyState.IsKeyDown (Key.W)) {
 				Global.LookingAt.X--;
-			} else if (keyState.IsKeyDown (Key.S)) {
-				Global.LookingAt.X++;
-			} else if (keyState.IsKeyDown (Key.W)) {
-				Global.LookingAt.Z++;
 			} else if (keyState.IsKeyDown (Key.A)) {
+				Global.LookingAt.X++;
+            } else if (keyState.IsKeyDown (Key.S)) {
+				Global.LookingAt.Z++;
+			} else if (keyState.IsKeyDown (Key.Q)) {
 				Global.LookingAt.Z--;
 			} 
 
