@@ -10,7 +10,7 @@ namespace OpenTkClient
     public static class CharacterManager
     {
         private static Dictionary<int, Position> _characters = new Dictionary<int, Position>();
-        private static object _lock;
+		private static object _lock = new object();
         public static void UpdateLocation(int id, Position position)
         {
             lock (_lock)

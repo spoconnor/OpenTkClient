@@ -9,6 +9,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
 using Sean.Shared;
 using OpenTK.Input;
+using System.IO;
 
 namespace OpenTkClient
 {
@@ -19,7 +20,7 @@ namespace OpenTkClient
 		Font sans = new Font(FontFamily.GenericSansSerif, 24);
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
-		int blockTexture;
+		int[] textures = new int[255];
         int boxListIndex;
 
         public GameRenderer()
@@ -68,7 +69,14 @@ namespace OpenTkClient
             //initialize our scene data
             //CreateVertexBuffer();
 
-			blockTexture = LoadTexture();
+			textures[(int)Block.BlockType.Unknown] = LoadTexture("block.png");
+			textures[(int)Block.BlockType.Rock] = LoadTexture("rock.png");
+			textures[(int)Block.BlockType.Grass] = LoadTexture("grass.png");
+			textures[(int)Block.BlockType.Dirt] = LoadTexture("grass.png");
+			textures[(int)Block.BlockType.WoodTile1] = LoadTexture("wood.png");
+			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
+			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
+
 			renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
 
@@ -102,10 +110,10 @@ namespace OpenTkClient
         //                           vertices, BufferUsageHint.StaticDraw);
         //}
 
-        private int LoadTexture()
+		private int LoadTexture(string filename)
 		{
 			int texture;
-			Bitmap bitmap = new Bitmap("block.png");
+			Bitmap bitmap = new Bitmap(Path.Combine("Resources",filename));
 
 			GL.GenTextures(1, out texture);
 			GL.BindTexture(TextureTarget.Texture2D, texture);
@@ -192,13 +200,11 @@ namespace OpenTkClient
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
                 RenderBlock((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
             }
-            if (e.Time % 2 == 0)
+
+            foreach (var character in CharacterManager.GetCharacters(Global.Direction))
             {
-                foreach (var character in CharacterManager.GetCharacters(Global.Direction))
-                {
-                    var scrPos = WorldToScreen(character.Item1);
-                    RenderBlock((float)e.Time, Block.BlockType.Dirt, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
-                }
+                var scrPos = WorldToScreen(character.Item1);
+				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
             }
 
             SwapBuffers();
@@ -242,8 +248,12 @@ namespace OpenTkClient
         }
         void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
         {
+			int texture = textures [(int)blockType];
+			if (texture == 0)
+				return;
             GL.PushMatrix();
             GL.Translate(x,y,z);
+			GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.CallList(boxListIndex);
             GL.PopMatrix();
         }
@@ -256,7 +266,6 @@ namespace OpenTkClient
 			GL.Enable(EnableCap.Blend);
 			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
             //GL.Scale (0.1, 0.1, 1.0);
             float halfSprSize = 16;

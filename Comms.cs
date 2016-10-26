@@ -92,7 +92,7 @@ namespace OpenTkClient
             }
             if (msg.MapCharacterUpdate != null)
             {
-
+				CharacterManager.UpdateLocation (msg.MapCharacterUpdate.CharacterId, msg.MapCharacterUpdate.Position);
             }
         }
 
