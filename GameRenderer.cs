@@ -180,52 +180,67 @@ namespace OpenTkClient
             //GL.Enable(EnableCap.Lighting);
             //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Clear(ClearBufferMask.ColorBufferBit);
-
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-			int midWidth = (int)(this.Width * Global.Scale / 2);
-			int midHeight = (int)(this.Height * Global.Scale / 2);
-            int sprXOffset = 16;
-            int sprYOffset = 8;
-            int sprHeight = 16;
-			foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
+
+            foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
-				var pos = blockInfo.Item1;
-				var blockType = blockInfo.Item2;
-					
-				float x1 = pos.X - Global.LookingAt.X;
-				float y1 = pos.Y - Global.LookingAt.Y;
-				float z1 = pos.Z - Global.LookingAt.Z;
+                var pos = blockInfo.Item1;
+                var blockType = blockInfo.Item2;
 
-                //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
-
-                float x2 = 0.0f,y2 = 0.0f,z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
-                switch (Global.Direction)
-                {
-                    case Facing.North:
-                        x2 = midWidth + (z1 - x1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (- x1 - z1) * sprYOffset;
-                        break;
-                    case Facing.South:
-                        x2 = midWidth + (x1 - z1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
-                        break;
-                    case Facing.East:
-                        x2 = midWidth + (- x1 - z1) * sprXOffset;
-						y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
-                        break;
-                    case Facing.West:
-                        x2 = midWidth + (x1 + z1) * sprXOffset;
-						y2 = midHeight + (y1 * sprHeight) + (- x1 + z1) * sprYOffset;
-						break;
-                }
+                var scrPos = WorldToScreen(pos);
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
-                RenderBlock((float)e.Time, blockType, x2, y2, z2);
+                RenderBlock((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
             }
-			SwapBuffers();
+            if (e.Time % 2 == 0)
+            {
+                foreach (var character in CharacterManager.GetCharacters(Global.Direction))
+                {
+                    var scrPos = WorldToScreen(character.Item1);
+                    RenderBlock((float)e.Time, Block.BlockType.Dirt, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
+                }
+            }
+
+            SwapBuffers();
 		}
 
-		void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
+        private Tuple<float,float,float> WorldToScreen(Position pos)
+        {
+            int midWidth = (int)(this.Width * Global.Scale / 2);
+            int midHeight = (int)(this.Height * Global.Scale / 2);
+            const int sprXOffset = 16;
+            const int sprYOffset = 8;
+            const int sprHeight = 16;
+
+            float x1 = pos.X - Global.LookingAt.X;
+            float y1 = pos.Y - Global.LookingAt.Y;
+            float z1 = pos.Z - Global.LookingAt.Z;
+
+            //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
+
+            float x2 = 0.0f, y2 = 0.0f, z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+            switch (Global.Direction)
+            {
+                case Facing.North:
+                    x2 = midWidth + (z1 - x1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (-x1 - z1) * sprYOffset;
+                    break;
+                case Facing.South:
+                    x2 = midWidth + (x1 - z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
+                    break;
+                case Facing.East:
+                    x2 = midWidth + (-x1 - z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
+                    break;
+                case Facing.West:
+                    x2 = midWidth + (x1 + z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (-x1 + z1) * sprYOffset;
+                    break;
+            }
+            return new Tuple<float, float, float>(x2, y2, z2);
+        }
+        void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
         {
             GL.PushMatrix();
             GL.Translate(x,y,z);
@@ -233,7 +248,7 @@ namespace OpenTkClient
             GL.PopMatrix();
         }
 
-		int CompileBox()
+        int CompileBox()
         {
             int newList = GL.GenLists(1);
             GL.NewList(newList, ListMode.Compile);

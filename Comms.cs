@@ -90,6 +90,10 @@ namespace OpenTkClient
             {
                 MapManager.SetWorldMap(msg);
             }
+            if (msg.MapCharacterUpdate != null)
+            {
+
+            }
         }
 
     }
