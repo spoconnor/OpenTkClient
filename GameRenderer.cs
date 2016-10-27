@@ -9,6 +9,7 @@ using OpenTK.Graphics.OpenGL;
 using System.Drawing.Imaging;
 using Sean.Shared;
 using OpenTK.Input;
+using System.IO;
 
 namespace OpenTkClient
 {
@@ -19,7 +20,7 @@ namespace OpenTkClient
 		Font sans = new Font(FontFamily.GenericSansSerif, 24);
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
-		int blockTexture;
+		int[] textures = new int[255];
         int boxListIndex;
 
         public GameRenderer()
@@ -68,7 +69,14 @@ namespace OpenTkClient
             //initialize our scene data
             //CreateVertexBuffer();
 
-			blockTexture = LoadTexture();
+			textures[(int)Block.BlockType.Unknown] = LoadTexture("block.png");
+			textures[(int)Block.BlockType.Rock] = LoadTexture("rock.png");
+			textures[(int)Block.BlockType.Grass] = LoadTexture("grass.png");
+			textures[(int)Block.BlockType.Dirt] = LoadTexture("grass.png");
+			textures[(int)Block.BlockType.WoodTile1] = LoadTexture("wood.png");
+			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
+			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
+
 			renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
 
@@ -102,10 +110,10 @@ namespace OpenTkClient
         //                           vertices, BufferUsageHint.StaticDraw);
         //}
 
-        private int LoadTexture()
+		private int LoadTexture(string filename)
 		{
 			int texture;
-			Bitmap bitmap = new Bitmap("block.png");
+			Bitmap bitmap = new Bitmap(Path.Combine("Resources",filename));
 
 			GL.GenTextures(1, out texture);
 			GL.BindTexture(TextureTarget.Texture2D, texture);
@@ -180,60 +188,77 @@ namespace OpenTkClient
             //GL.Enable(EnableCap.Lighting);
             //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Clear(ClearBufferMask.ColorBufferBit);
-
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-			int midWidth = (int)(this.Width * Global.Scale / 2);
-			int midHeight = (int)(this.Height * Global.Scale / 2);
-            int sprXOffset = 16;
-            int sprYOffset = 8;
-            int sprHeight = 16;
-			foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
+
+            foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
-				var pos = blockInfo.Item1;
-				var blockType = blockInfo.Item2;
-					
-				float x1 = pos.X - Global.LookingAt.X;
-				float y1 = pos.Y - Global.LookingAt.Y;
-				float z1 = pos.Z - Global.LookingAt.Z;
+                var pos = blockInfo.Item1;
+                var blockType = blockInfo.Item2;
 
-                //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
-
-                float x2 = 0.0f,y2 = 0.0f,z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
-                switch (Global.Direction)
-                {
-                    case Facing.North:
-                        x2 = midWidth + (z1 - x1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (- x1 - z1) * sprYOffset;
-                        break;
-                    case Facing.South:
-                        x2 = midWidth + (x1 - z1) * sprXOffset;
-				        y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
-                        break;
-                    case Facing.East:
-                        x2 = midWidth + (- x1 - z1) * sprXOffset;
-						y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
-                        break;
-                    case Facing.West:
-                        x2 = midWidth + (x1 + z1) * sprXOffset;
-						y2 = midHeight + (y1 * sprHeight) + (- x1 + z1) * sprYOffset;
-						break;
-                }
+                var scrPos = WorldToScreen(pos);
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
-                RenderBlock((float)e.Time, blockType, x2, y2, z2);
+                RenderBlock((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
             }
-			SwapBuffers();
+
+            foreach (var character in CharacterManager.GetCharacters(Global.Direction))
+            {
+                var scrPos = WorldToScreen(character.Item1);
+				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
+            }
+
+            SwapBuffers();
 		}
 
-		void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
+        private Tuple<float,float,float> WorldToScreen(Position pos)
         {
+            int midWidth = (int)(this.Width * Global.Scale / 2);
+            int midHeight = (int)(this.Height * Global.Scale / 2);
+            const int sprXOffset = 16;
+            const int sprYOffset = 8;
+            const int sprHeight = 16;
+
+            float x1 = pos.X - Global.LookingAt.X;
+            float y1 = pos.Y - Global.LookingAt.Y;
+            float z1 = pos.Z - Global.LookingAt.Z;
+
+            //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
+
+            float x2 = 0.0f, y2 = 0.0f, z2 = 0.0f;//(y1 + (x1 + z1) * 128.0f) / (64.0f * 128.0f);
+            switch (Global.Direction)
+            {
+                case Facing.North:
+                    x2 = midWidth + (z1 - x1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (-x1 - z1) * sprYOffset;
+                    break;
+                case Facing.South:
+                    x2 = midWidth + (x1 - z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (x1 + z1) * sprYOffset;
+                    break;
+                case Facing.East:
+                    x2 = midWidth + (-x1 - z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (x1 - z1) * sprYOffset;
+                    break;
+                case Facing.West:
+                    x2 = midWidth + (x1 + z1) * sprXOffset;
+                    y2 = midHeight + (y1 * sprHeight) + (-x1 + z1) * sprYOffset;
+                    break;
+            }
+            return new Tuple<float, float, float>(x2, y2, z2);
+        }
+        void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
+        {
+			int texture = textures [(int)blockType];
+			if (texture == 0)
+				return;
             GL.PushMatrix();
             GL.Translate(x,y,z);
+			GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.CallList(boxListIndex);
             GL.PopMatrix();
         }
 
-		int CompileBox()
+        int CompileBox()
         {
             int newList = GL.GenLists(1);
             GL.NewList(newList, ListMode.Compile);
@@ -241,7 +266,6 @@ namespace OpenTkClient
 			GL.Enable(EnableCap.Blend);
 			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-			GL.BindTexture(TextureTarget.Texture2D, blockTexture);
 
             //GL.Scale (0.1, 0.1, 1.0);
             float halfSprSize = 16;
