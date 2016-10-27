@@ -36,7 +36,7 @@ namespace OpenTkClient
         {
 			lock (_lock) {
 				var position = msg.Map.MinPosition;
-				var coords = new ChunkCoords (ref position);
+				var coords = new ChunkCoords (position);
 				var chunk = Sean.Shared.Chunk.Deserialize (coords, msg.Data);
 				_chunksN.Add (coords, chunk);
 				_chunksS.Add (new ChunkCoords(Global.MaxChunkLimit - position.X, Global.MaxChunkLimit - position.Z), chunk);
