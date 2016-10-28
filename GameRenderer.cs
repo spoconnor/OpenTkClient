@@ -73,7 +73,8 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Rock] = LoadTexture("rock.png");
 			textures[(int)Block.BlockType.Grass] = LoadTexture("grass.png");
 			textures[(int)Block.BlockType.Dirt] = LoadTexture("grass.png");
-			textures[(int)Block.BlockType.WoodTile1] = LoadTexture("wood.png");
+			textures[(int)Block.BlockType.Tree] = LoadTexture("tree.png");
+			textures[(int)Block.BlockType.Leaves] = LoadTexture("leaves.png");
 			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
 
@@ -195,7 +196,7 @@ namespace OpenTkClient
                 var pos = blockInfo.Item1;
                 var blockType = blockInfo.Item2;
 
-                var scrPos = WorldToScreen(pos);
+                var scrPos = WorldToScreen(pos.X, pos.Y, pos.Z);
 
                 //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
                 RenderBlock((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
@@ -203,14 +204,16 @@ namespace OpenTkClient
 
             foreach (var character in CharacterManager.GetCharacters(Global.Direction))
             {
-                var scrPos = WorldToScreen(character.Item1);
+                var scrPos = WorldToScreen(character.Item1.X, character.Item1.Y, character.Item1.Z);
+				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
+                scrPos = WorldToScreen(character.Item1.X, character.Item1.Y + 1, character.Item1.Z);
 				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
             }
 
             SwapBuffers();
 		}
 
-        private Tuple<float,float,float> WorldToScreen(Position pos)
+        private Tuple<float,float,float> WorldToScreen(int x, int y, int z)
         {
             int midWidth = (int)(this.Width * Global.Scale / 2);
             int midHeight = (int)(this.Height * Global.Scale / 2);
@@ -218,9 +221,9 @@ namespace OpenTkClient
             const int sprYOffset = 8;
             const int sprHeight = 16;
 
-            float x1 = pos.X - Global.LookingAt.X;
-            float y1 = pos.Y - Global.LookingAt.Y;
-            float z1 = pos.Z - Global.LookingAt.Z;
+            float x1 = x - Global.LookingAt.X;
+            float y1 = y - Global.LookingAt.Y;
+            float z1 = z - Global.LookingAt.Z;
 
             //if (y1 > 1 || x1 > 5 || z1 > 5) continue;
 
