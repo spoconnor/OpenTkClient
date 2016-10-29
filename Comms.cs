@@ -11,6 +11,7 @@ namespace OpenTkClient
     public class Comms
     {
         private static Thread thread;
+		private static List<string> sent = new List<string>();
 
         public static void Run()
         {
@@ -50,23 +51,19 @@ namespace OpenTkClient
                 //    WorldMapRequest = new WorldMapRequestMessage()
                 //});
         
-				List<string> sent = new List<string>();
 				while(true)
 				{
 					int x = Global.LookingAt.X / Global.CHUNK_SIZE;
 					int z = Global.LookingAt.Z / Global.CHUNK_SIZE;
-					string hash = $"{x},{z}";
-					if (!sent.Contains(hash))
-					{
-						sent.Add(hash);
-						ClientConnection.BroadcastMessage(new Message()
-						{
-							MapRequest = new MapRequestMessage()
-							{
-								Coords = new ChunkCoords(x,z)
-							}
-						});
-						}
+					SendGetMap(x,z);
+					SendGetMap(x+1,z);
+					SendGetMap(x-1,z);
+					SendGetMap(x,z+1);
+					SendGetMap(x,z-1);
+					SendGetMap(x+1,z+1);
+					SendGetMap(x+1,z-1);
+					SendGetMap(x-1,z+1);
+					SendGetMap(x-1,z-1);
 					Thread.Sleep (2000);
 				}
 			
@@ -78,6 +75,23 @@ namespace OpenTkClient
                 Console.WriteLine("Exception caught in ServerSocketListener - {0}", e.ToString());
             }
         }
+
+		private static void SendGetMap(int x, int z)
+		{
+			string hash = $"{x},{z}";
+			if (!sent.Contains(hash))
+			{
+				sent.Add(hash);
+				ClientConnection.BroadcastMessage(new Message()
+					{
+						MapRequest = new MapRequestMessage()
+						{
+							Coords = new ChunkCoords(x,z)
+						}
+					}
+				);
+			}
+		}
 
         public static void ProcessMessage(Guid clientId, Message msg)
         {

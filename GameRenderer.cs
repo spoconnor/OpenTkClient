@@ -190,26 +190,35 @@ namespace OpenTkClient
             //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Clear(ClearBufferMask.ColorBufferBit);
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-
+			int drawCount = 0;
+			int cullCount = 0;
             foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
                 var pos = blockInfo.Item1;
                 var blockType = blockInfo.Item2;
 
                 var scrPos = WorldToScreen(pos.X, pos.Y, pos.Z);
-
-                //Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
-                RenderBlock((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
+				if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale) 
+					|| scrPos.Item3 < 0 || scrPos.Item3 > (this.Height * Global.Scale)) {
+					//Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
+					cullCount++;
+				}
+				else
+				{
+					drawCount++;
+					RenderBlock ((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
+				}
             }
 
             foreach (var character in CharacterManager.GetCharacters(Global.Direction))
             {
+				drawCount++;
                 var scrPos = WorldToScreen(character.Item1.X, character.Item1.Y, character.Item1.Z);
 				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
                 scrPos = WorldToScreen(character.Item1.X, character.Item1.Y + 1, character.Item1.Z);
 				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
             }
-
+			//Console.WriteLine ($"DrawCount:{drawCount}, Culled:{cullCount}");
             SwapBuffers();
 		}
 
