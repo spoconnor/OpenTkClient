@@ -16,16 +16,21 @@ namespace OpenTkClient
 	class GameRenderer : GameWindow
 	{
 		TextRenderer renderer;
+		MouseState mouseState;
+		float trimHeight;
 		Font serif = new Font(FontFamily.GenericSerif, 24);
 		Font sans = new Font(FontFamily.GenericSansSerif, 24);
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
 		int[] textures = new int[255];
         int boxListIndex;
+		int mousePosX, mousePosY;
 
         public GameRenderer()
 			: base(800, 600)
 		{
+			this.KeyPress += GameRenderer_KeyPress;
+			this.MouseWheel += GameRenderer_MouseWheel;
 		}
 
 		protected override void OnLoad(EventArgs e)
@@ -146,6 +151,24 @@ namespace OpenTkClient
 			GL.Viewport(ClientRectangle);
 		}
 
+		void GameRenderer_MouseWheel (object sender, MouseWheelEventArgs e)
+		{
+			trimHeight = e.ValuePrecise;
+		}
+
+		void GameRenderer_KeyPress (object sender, KeyPressEventArgs e)
+		{
+			if (e.KeyChar == '1') {
+				Global.Direction = Facing.North;
+			} else if (e.KeyChar == '2') {
+				Global.Direction = Facing.East;
+			} else if (e.KeyChar == '3') {
+				Global.Direction = Facing.South;
+			} else if (e.KeyChar == '4') {
+				Global.Direction = Facing.West;
+			}
+		}
+			
 		protected override void OnUpdateFrame(FrameEventArgs e)
 		{			
 			if (Keyboard[OpenTK.Input.Key.Escape])
@@ -165,15 +188,19 @@ namespace OpenTkClient
 				Global.LookingAt.Z--;
 			} 
 
-			if (keyState.IsKeyDown (Key.Number1)) {
-				Global.Direction = Facing.North;
-			} else if (keyState.IsKeyDown (Key.Number2)) {
-				Global.Direction = Facing.East;
-			} else if (keyState.IsKeyDown (Key.Number3)) {
-				Global.Direction = Facing.South;
-			} else if (keyState.IsKeyDown (Key.Number4)) {
-				Global.Direction = Facing.West;
-			}
+//			if (keyState.IsKeyDown (Key.Number1)) {
+//				Global.Direction = Facing.North;
+//			} else if (keyState.IsKeyDown (Key.Number2)) {
+//				Global.Direction = Facing.East;
+//			} else if (keyState.IsKeyDown (Key.Number3)) {
+//				Global.Direction = Facing.South;
+//			} else if (keyState.IsKeyDown (Key.Number4)) {
+//				Global.Direction = Facing.West;
+//			}
+
+			var mouseState = Mouse.GetState ();
+			mousePosX = mouseState.X;
+			mousePosY = mouseState.Y;
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
@@ -205,8 +232,10 @@ namespace OpenTkClient
 				}
 				else
 				{
-					drawCount++;
-					RenderBlock ((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
+					if (pos.Y < trimHeight) {
+						drawCount++;
+						RenderBlock ((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
+					}
 				}
             }
 
