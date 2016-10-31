@@ -29,11 +29,12 @@ namespace OpenTkClient
         public GameRenderer()
 			: base(800, 600)
 		{
-			this.KeyPress += GameRenderer_KeyPress;
-			this.MouseWheel += GameRenderer_MouseWheel;
+			this.KeyPress += OnKeyPress;
+			this.MouseWheel += OnMouseWheel;
+            this.MouseDown += OnMouseDown;
 		}
 
-		protected override void OnLoad(EventArgs e)
+        protected override void OnLoad(EventArgs e)
 		{
             //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             //GL.LoadIdentity();                           // Reset Projection matrix
@@ -151,12 +152,27 @@ namespace OpenTkClient
 			GL.Viewport(ClientRectangle);
 		}
 
-		void GameRenderer_MouseWheel (object sender, MouseWheelEventArgs e)
+		void OnMouseWheel (object sender, MouseWheelEventArgs e)
 		{
 			trimHeight = e.ValuePrecise;
 		}
 
-		void GameRenderer_KeyPress (object sender, KeyPressEventArgs e)
+        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Console.WriteLine("Mouse click");
+
+            //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
+            //GL.LoadIdentity();                           // Reset Projection matrix
+            //GL.Ortho(0, this.Width * Global.Scale, 0, this.Height * Global.Scale, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
+            //GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
+            //GL.LoadIdentity();                           // Reset the Model View Matrix
+            
+            //float pixels = 0.0f;
+            //GL.ReadPixels<float>(mousePosX, mousePosY, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.Float, ref pixels);
+            //Console.WriteLine(pixels);
+        }
+
+        void OnKeyPress (object sender, KeyPressEventArgs e)
 		{
 			if (e.KeyChar == '1') {
 				Global.Direction = Facing.North;
@@ -214,8 +230,9 @@ namespace OpenTkClient
             GL.LoadIdentity();                           // Reset the Model View Matrix
 
             //GL.Enable(EnableCap.Lighting);
-            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Enable(EnableCap.DepthTest);
+            //GL.Clear(ClearBufferMask.ColorBufferBit);
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
 			int drawCount = 0;
 			int cullCount = 0;
@@ -226,7 +243,7 @@ namespace OpenTkClient
 
                 var scrPos = WorldToScreen(pos.X, pos.Y, pos.Z);
 				if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale) 
-					|| scrPos.Item3 < 0 || scrPos.Item3 > (this.Height * Global.Scale)) {
+					|| scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale)) {
 					//Console.WriteLine($"{x1},{y1},{z1}=>{x2},{y2},{z2}");
 					cullCount++;
 				}
@@ -247,7 +264,13 @@ namespace OpenTkClient
                 scrPos = WorldToScreen(character.Item1.X, character.Item1.Y + 1, character.Item1.Z);
 				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
             }
-			//Console.WriteLine ($"DrawCount:{drawCount}, Culled:{cullCount}");
+            //Console.WriteLine ($"DrawCount:{drawCount}, Culled:{cullCount}");
+
+            float pixels = 0.0f;
+            GL.ReadPixels<float>(mousePosX, mousePosY, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.Float, ref pixels);
+            Console.WriteLine(pixels);
+
+            GL.Disable(EnableCap.DepthTest);
             SwapBuffers();
 		}
 
@@ -285,6 +308,7 @@ namespace OpenTkClient
                     y2 = midHeight + (y1 * sprHeight) + (-x1 + z1) * sprYOffset;
                     break;
             }
+            z2 = (x1 + z1 + y1) / (32+32+128); // TODO - find suitable depth algorithm
             return new Tuple<float, float, float>(x2, y2, z2);
         }
         void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
