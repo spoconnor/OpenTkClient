@@ -106,7 +106,11 @@ namespace OpenTkClient
             }
             if (msg.MapCharacterUpdate != null)
             {
-				CharacterManager.UpdateLocation (msg.MapCharacterUpdate.CharacterId, msg.MapCharacterUpdate.Position);
+                CharacterManager.UpdateLocation(msg.MapCharacterUpdate.CharacterId, msg.MapCharacterUpdate.Position);
+            }
+            if (msg.MapUpdate != null)
+            {
+                MapManager.SetBlock(msg.MapUpdate.Position, msg.MapUpdate.NewBlock);
             }
         }
 

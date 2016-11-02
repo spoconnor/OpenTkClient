@@ -45,6 +45,12 @@ namespace OpenTkClient
 			}
         }
 
+        public static void SetBlock(Position position, Block newBlock)
+        {
+            var coords = new ChunkCoords(position);
+            _chunksN[coords].Blocks[position] = newBlock;
+        }
+
 		public static IEnumerable<Tuple<Position, Block.BlockType>> GetBlocks(Facing direction)
         {
 			lock (_lock) {

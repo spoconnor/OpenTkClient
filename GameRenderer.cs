@@ -24,7 +24,9 @@ namespace OpenTkClient
 		float angle;
 		int[] textures = new int[255];
         int boxListIndex;
-		int mousePosX, mousePosY;
+		float mousePosX, mousePosY;
+
+        const int BlockTypeCursor = 51; // TODO
 
         public GameRenderer()
 			: base(800, 600)
@@ -32,7 +34,9 @@ namespace OpenTkClient
 			this.KeyPress += OnKeyPress;
 			this.MouseWheel += OnMouseWheel;
             this.MouseDown += OnMouseDown;
+            this.MouseMove += OnMouseMove;
 		}
+
 
         protected override void OnLoad(EventArgs e)
 		{
@@ -83,6 +87,7 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Leaves] = LoadTexture("leaves.png");
 			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
+			textures[(int)BlockTypeCursor] = LoadTexture("cursor.png");
 
 			renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
@@ -166,10 +171,18 @@ namespace OpenTkClient
             //GL.Ortho(0, this.Width * Global.Scale, 0, this.Height * Global.Scale, -1.0, 1.0);             // Set clipping area's left, right, bottom, top
             //GL.MatrixMode(MatrixMode.Modelview);         // Select the ModelView for operation
             //GL.LoadIdentity();                           // Reset the Model View Matrix
-            
+
             //float pixels = 0.0f;
             //GL.ReadPixels<float>(mousePosX, mousePosY, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.Float, ref pixels);
             //Console.WriteLine(pixels);
+
+            //Console.WriteLine($"{mousePosX},{mousePosY}");
+        }
+
+        private void OnMouseMove(object sender, MouseMoveEventArgs e)
+        {
+            mousePosX = e.X * Global.Scale;
+            mousePosY = (this.Height - e.Y) * Global.Scale;
         }
 
         void OnKeyPress (object sender, KeyPressEventArgs e)
@@ -213,10 +226,6 @@ namespace OpenTkClient
 //			} else if (keyState.IsKeyDown (Key.Number4)) {
 //				Global.Direction = Facing.West;
 //			}
-
-			var mouseState = Mouse.GetState ();
-			mousePosX = mouseState.X;
-			mousePosY = mouseState.Y;
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
@@ -230,8 +239,8 @@ namespace OpenTkClient
             GL.LoadIdentity();                           // Reset the Model View Matrix
 
             //GL.Enable(EnableCap.Lighting);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            GL.Enable(EnableCap.DepthTest);
+            GL.Clear(ClearBufferMask.ColorBufferBit);// | ClearBufferMask.DepthBufferBit);
+            GL.Disable(EnableCap.DepthTest);
             //GL.Clear(ClearBufferMask.ColorBufferBit);
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
 			int drawCount = 0;
@@ -266,11 +275,7 @@ namespace OpenTkClient
             }
             //Console.WriteLine ($"DrawCount:{drawCount}, Culled:{cullCount}");
 
-            float pixels = 0.0f;
-            GL.ReadPixels<float>(mousePosX, mousePosY, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.DepthComponent, PixelType.Float, ref pixels);
-            Console.WriteLine(pixels);
-
-            GL.Disable(EnableCap.DepthTest);
+            //GL.Disable(EnableCap.DepthTest);
             SwapBuffers();
 		}
 
@@ -308,7 +313,7 @@ namespace OpenTkClient
                     y2 = midHeight + (y1 * sprHeight) + (-x1 + z1) * sprYOffset;
                     break;
             }
-            z2 = (x1 + z1 + y1) / (32+32+128); // TODO - find suitable depth algorithm
+            z2 = 0.0f;// (x1 + z1 + y1) / (32+32+128);
             return new Tuple<float, float, float>(x2, y2, z2);
         }
         void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
@@ -320,6 +325,15 @@ namespace OpenTkClient
             GL.Translate(x,y,z);
 			GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.CallList(boxListIndex);
+
+            if ( Math.Abs(x - mousePosX) < 16 && Math.Abs(y-mousePosY) < 16)
+            {
+			    texture = textures [(int)BlockTypeCursor];
+			    if (texture == 0)
+    				return;
+			    GL.BindTexture(TextureTarget.Texture2D, texture);
+                GL.CallList(boxListIndex);
+            }
             GL.PopMatrix();
         }
 
@@ -372,7 +386,7 @@ namespace OpenTkClient
 
 			GL.Disable(EnableCap.Texture2D);
 			GL.Disable(EnableCap.Blend);
-			GL.Enable(EnableCap.DepthTest);
+			//GL.Enable(EnableCap.DepthTest);
 		}
 
 	}
