@@ -25,6 +25,7 @@ namespace OpenTkClient
 		int[] textures = new int[255];
         int boxListIndex;
 		float mousePosX, mousePosY;
+        Position selectedBlock = new Position(0,0,0);
 
         const int BlockTypeCursor = 51; // TODO
 
@@ -164,7 +165,7 @@ namespace OpenTkClient
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Console.WriteLine("Mouse click");
+            Console.WriteLine($"Mouse click. {selectedBlock}");
 
             //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             //GL.LoadIdentity();                           // Reset Projection matrix
@@ -260,7 +261,7 @@ namespace OpenTkClient
 				{
 					if (pos.Y < trimHeight) {
 						drawCount++;
-						RenderBlock ((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3);
+						RenderBlock ((float)e.Time, blockType, scrPos.Item1, scrPos.Item2, scrPos.Item3, pos);
 					}
 				}
             }
@@ -269,9 +270,9 @@ namespace OpenTkClient
             {
 				drawCount++;
                 var scrPos = WorldToScreen(character.Item1.X, character.Item1.Y, character.Item1.Z);
-				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
+				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3, character.Item1); // TODO - sprite block type
                 scrPos = WorldToScreen(character.Item1.X, character.Item1.Y + 1, character.Item1.Z);
-				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3); // TODO - sprite block type
+				RenderBlock((float)e.Time, Block.BlockType.Placeholder1, scrPos.Item1, scrPos.Item2, scrPos.Item3, character.Item1); // TODO - sprite block type
             }
             //Console.WriteLine ($"DrawCount:{drawCount}, Culled:{cullCount}");
 
@@ -316,7 +317,7 @@ namespace OpenTkClient
             z2 = 0.0f;// (x1 + z1 + y1) / (32+32+128);
             return new Tuple<float, float, float>(x2, y2, z2);
         }
-        void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z)
+        void RenderBlock(float time, Block.BlockType blockType, float x, float y, float z, Position pos)
         {
 			int texture = textures [(int)blockType];
 			if (texture == 0)
@@ -333,6 +334,7 @@ namespace OpenTkClient
     				return;
 			    GL.BindTexture(TextureTarget.Texture2D, texture);
                 GL.CallList(boxListIndex);
+                selectedBlock = pos;
             }
             GL.PopMatrix();
         }
