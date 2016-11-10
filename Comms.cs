@@ -105,22 +105,29 @@ namespace OpenTkClient
 
         public static void ProcessMessage(Guid clientId, Message msg)
         {
-            Console.WriteLine($"Processing response... {msg.ToString()}");
-            if (msg.Map != null)
+            try
             {
-                MapManager.AddChunk (msg);
+                Console.WriteLine ($"Processing response... {msg.ToString ()}");
+                if (msg.Map != null)
+                {
+                    MapManager.AddChunk (msg);
+                }
+                if (msg.WorldMapResponse != null)
+                {
+                    MapManager.SetWorldMap (msg);
+                }
+                if (msg.MapCharacterUpdate != null)
+                {
+                    CharacterManager.UpdateLocation (msg.MapCharacterUpdate.CharacterId, msg.MapCharacterUpdate.Position);
+                }
+                if (msg.MapUpdate != null)
+                {
+                    MapManager.SetBlock (msg.MapUpdate.Position, msg.MapUpdate.NewBlock);
+                }
             }
-            if (msg.WorldMapResponse != null)
+            catch (Exception e)
             {
-                MapManager.SetWorldMap(msg);
-            }
-            if (msg.MapCharacterUpdate != null)
-            {
-                CharacterManager.UpdateLocation(msg.MapCharacterUpdate.CharacterId, msg.MapCharacterUpdate.Position);
-            }
-            if (msg.MapUpdate != null)
-            {
-                MapManager.SetBlock(msg.MapUpdate.Position, msg.MapUpdate.NewBlock);
+                Console.WriteLine("Exception caught in ProcessMessage - {0}", e.ToString());
             }
         }
 
