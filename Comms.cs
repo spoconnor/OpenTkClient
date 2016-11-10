@@ -53,8 +53,9 @@ namespace OpenTkClient
         
 				while(true)
 				{
-					int x = Global.LookingAt.X / Global.CHUNK_SIZE;
+                    int x = Global.LookingAt.X / Global.CHUNK_SIZE;
 					int z = Global.LookingAt.Z / Global.CHUNK_SIZE;
+                    SendGetWorldMap();
 					SendGetMap(x,z);
 					SendGetMap(x+1,z);
 					SendGetMap(x-1,z);
@@ -76,7 +77,16 @@ namespace OpenTkClient
             }
         }
 
-		private static void SendGetMap(int x, int z)
+        private static void SendGetWorldMap()
+        {
+            ClientConnection.BroadcastMessage(new Message()
+            {
+                WorldMapRequest = new WorldMapRequestMessage()
+            }
+            );
+        }
+
+        private static void SendGetMap(int x, int z)
 		{
 			string hash = $"{x},{z}";
 			if (!sent.Contains(hash))
