@@ -50,12 +50,12 @@ namespace OpenTkClient
                 //{
                 //    WorldMapRequest = new WorldMapRequestMessage()
                 //});
-        
+
+                SendGetWorldMap();
 				while(true)
 				{
                     int x = Global.LookingAt.X / Global.CHUNK_SIZE;
 					int z = Global.LookingAt.Z / Global.CHUNK_SIZE;
-                    SendGetWorldMap();
 					SendGetMap(x,z);
 					SendGetMap(x+1,z);
 					SendGetMap(x-1,z);

@@ -10,6 +10,7 @@ using System.Drawing.Imaging;
 using Sean.Shared;
 using OpenTK.Input;
 using System.IO;
+using System.Collections.Generic;
 
 namespace OpenTkClient
 {
@@ -28,6 +29,7 @@ namespace OpenTkClient
         Position selectedBlock = new Position(0,0,0);
 
         const int BlockTypeCursor = 51; // TODO
+        const int TextureGrass = 52; // TODO
 
         public GameRenderer()
 			: base(800, 600)
@@ -89,8 +91,9 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
 			textures[(int)BlockTypeCursor] = LoadTexture("cursor.png");
+            textures[(int)TextureGrass] = LoadTexture("grass_texture.png");
 
-			renderer = new TextRenderer(Width, Height);
+            renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
 
 			renderer.Clear(Color.Transparent);
@@ -216,7 +219,11 @@ namespace OpenTkClient
 				Global.LookingAt.Z++;
 			} else if (keyState.IsKeyDown (Key.Q)) {
 				Global.LookingAt.Z--;
-			} 
+			} else if (keyState.IsKeyDown(Key.PageUp)) {
+                Global.Scale--;
+            } else if (keyState.IsKeyDown(Key.PageDown)) {
+                Global.Scale++;
+            }
 
 //			if (keyState.IsKeyDown (Key.Number1)) {
 //				Global.Direction = Facing.North;
@@ -244,7 +251,15 @@ namespace OpenTkClient
             GL.Disable(EnableCap.DepthTest);
             //GL.Clear(ClearBufferMask.ColorBufferBit);
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
-			int drawCount = 0;
+
+            // Render World Map
+            foreach (var poly in MapManager.GetWorldMapBlocks(Global.Direction))
+            {
+                RenderPoly(poly);
+            }
+
+            // Render Local Chunks
+            int drawCount = 0;
 			int cullCount = 0;
             foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
@@ -336,6 +351,67 @@ namespace OpenTkClient
                 GL.CallList(boxListIndex);
                 selectedBlock = pos;
             }
+            GL.PopMatrix();
+        }
+
+        void RenderPoly(List<Position> poly)
+        {
+            GL.PushMatrix();
+            //GL.Disable(EnableCap.Lighting);
+            //GL.Disable(EnableCap.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, textures[(int)TextureGrass]);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Texture2D);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Begin(PrimitiveType.Quads);
+
+            Position pt = poly[0];
+            var scrPos = WorldToScreen(pt.X, pt.Y, pt.Z);
+            if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale)
+                    || scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale))
+            {
+                //cullCount++;
+            }
+            else
+            {
+                GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(scrPos.Item1, scrPos.Item2);
+            }
+            pt = poly[1];
+            scrPos = WorldToScreen(pt.X, pt.Y, pt.Z);
+            if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale)
+                    || scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale))
+            {
+                //cullCount++;
+            }
+            else
+            {
+                GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(scrPos.Item1, scrPos.Item2);
+            }
+            pt = poly[2];
+            scrPos = WorldToScreen(pt.X, pt.Y, pt.Z);
+            if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale)
+                    || scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale))
+            {
+                //cullCount++;
+            }
+            else
+            {
+                GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(scrPos.Item1, scrPos.Item2);
+            }
+            pt = poly[3];
+            scrPos = WorldToScreen(pt.X, pt.Y, pt.Z);
+            if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale)
+                    || scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale))
+            {
+                //cullCount++;
+            }
+            else
+            {
+                GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(scrPos.Item1, scrPos.Item2);
+            }
+            GL.End();
+            //GL.Enable(EnableCap.Lighting);
+            //GL.Enable(EnableCap.Texture2D);
             GL.PopMatrix();
         }
 
