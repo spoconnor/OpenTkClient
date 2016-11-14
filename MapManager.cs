@@ -91,9 +91,9 @@ namespace OpenTkClient
                             yield return new List<Position>
                             {
                                 new Position(x, worldMap[z,x], z),
-                                new Position(x+s, worldMap[z,x+s], z),
-                                new Position(x+s, worldMap[z+s,x+s], z+s),
-                                new Position(x, worldMap[z+s,x], z+s),
+                                //new Position(x+s, worldMap[z,x+s], z),
+                                //new Position(x+s, worldMap[z+s,x+s], z+s),
+                                //new Position(x, worldMap[z+s,x], z+s),
                             };
                         }
                     }

@@ -25,6 +25,7 @@ namespace OpenTkClient
 		float angle;
 		int[] textures = new int[255];
         int boxListIndex;
+        int boxListLargeIndex;
 		float mousePosX, mousePosY;
         Position selectedBlock = new Position(0,0,0);
 
@@ -105,6 +106,7 @@ namespace OpenTkClient
 			position.Y += mono.Height;
 
             boxListIndex = CompileBox();
+            boxListLargeIndex = CompileLargeBox ();
         }
 
         //void CreateVertexBuffer()
@@ -252,11 +254,20 @@ namespace OpenTkClient
             //GL.Clear(ClearBufferMask.ColorBufferBit);
             //RenderBlock((float)e.Time, new Block(Block.BlockType.Dirt), 100,100,0.1f);
 
+            GL.PushMatrix();
             // Render World Map
             foreach (var poly in MapManager.GetWorldMapBlocks(Global.Direction))
             {
-                RenderPoly(poly);
+                var scrPos = WorldToScreen(poly[0].X, poly[0].Y, poly[0].Z);
+                RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[0]);
+                //scrPos = WorldToScreen(poly[1].X, poly[1].Y, poly[1].Z);
+                //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[1]);
+                //scrPos = WorldToScreen(poly[2].X, poly[2].Y, poly[2].Z);
+                //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[2]);
+                //scrPos = WorldToScreen(poly[3].X, poly[3].Y, poly[3].Z);
+                //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[3]);
             }
+            GL.PopMatrix ();
 
             // Render Local Chunks
             int drawCount = 0;
@@ -353,7 +364,18 @@ namespace OpenTkClient
             }
             GL.PopMatrix();
         }
-
+        void RenderLargeBlock(float time, Block.BlockType blockType, float x, float y, float z, Position pos)
+        {
+            int texture = textures [(int)blockType];
+            if (texture == 0)
+                return;
+            GL.PushMatrix();
+            GL.Translate(x,y,z);
+            GL.BindTexture(TextureTarget.Texture2D, texture);
+            GL.CallList(boxListLargeIndex);
+            GL.PopMatrix();
+        }
+        /*
         void RenderPoly(List<Position> poly)
         {
             GL.PushMatrix();
@@ -414,7 +436,7 @@ namespace OpenTkClient
             //GL.Enable(EnableCap.Texture2D);
             GL.PopMatrix();
         }
-
+        */
         int CompileBox()
         {
             int newList = GL.GenLists(1);
@@ -436,6 +458,28 @@ namespace OpenTkClient
             GL.EndList();
             return newList;
         }
+        int CompileLargeBox()
+        {
+            int newList = GL.GenLists(1);
+            GL.NewList(newList, ListMode.Compile);
+
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Texture2D);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            //GL.Scale (0.1, 0.1, 1.0);
+            float halfSprSize = 512;
+            GL.Begin (PrimitiveType.Quads);
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-halfSprSize, -halfSprSize);
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(halfSprSize, -halfSprSize);
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(halfSprSize, halfSprSize);
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-halfSprSize, halfSprSize);
+            GL.End ();
+
+            GL.EndList();
+            return newList;
+        }
+
 
 		void RenderGui()
 		{
