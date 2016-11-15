@@ -114,7 +114,7 @@ namespace OpenTkClient
                 }
                 if (msg.WorldMapResponse != null)
                 {
-                    MapManager.SetWorldMap (msg);
+                    MapManager.SetWorldMapHeight (msg);
                 }
                 if (msg.MapCharacterUpdate != null)
                 {

@@ -11,11 +11,12 @@ namespace OpenTkClient
 		private static SortedList<ChunkCoords, Chunk> _chunksS = new SortedList<ChunkCoords, Chunk>();
 		private static SortedList<ChunkCoords, Chunk> _chunksE = new SortedList<ChunkCoords, Chunk>();
 		private static SortedList<ChunkCoords, Chunk> _chunksW = new SortedList<ChunkCoords, Chunk>();
-        private static Array<int> worldMap;
+        private static Array<int> worldMapHeight;
+        private static Array<int> worldMapBlocks;
 
         private static object _lock = new object ();
 
-        public static void SetWorldMap(Sean.Shared.Comms.Message msg)
+        public static void SetWorldMapHeight(Sean.Shared.Comms.Message msg)
         {
             var size = new ArraySize()
             {
@@ -27,8 +28,23 @@ namespace OpenTkClient
                 maxY = msg.WorldMapResponse.MaxPosition.Y,
                 maxZ = msg.WorldMapResponse.MaxPosition.Z,
             };
-            worldMap = new Array<int>(size);
-            worldMap.DeSerialize(msg.Data);
+            worldMapHeight = new Array<int>(size);
+            worldMapHeight.DeSerialize(msg.Data);
+        }
+        public static void SetWorldMapBlocks(Sean.Shared.Comms.Message msg)
+        {
+            var size = new ArraySize()
+            {
+                scale = msg.WorldMapResponse.Scale,
+                minX = msg.WorldMapResponse.MinPosition.X,
+                minY = msg.WorldMapResponse.MinPosition.Y,
+                minZ = msg.WorldMapResponse.MinPosition.Z,
+                maxX = msg.WorldMapResponse.MaxPosition.X,
+                maxY = msg.WorldMapResponse.MaxPosition.Y,
+                maxZ = msg.WorldMapResponse.MaxPosition.Z,
+            };
+            worldMapBlocks = new Array<int>(size);
+            worldMapBlocks.DeSerialize(msg.Data);
         }
 
         public static void AddChunk(Sean.Shared.Comms.Message msg)
@@ -80,17 +96,17 @@ namespace OpenTkClient
         {
             lock (_lock)
             {
-                if (worldMap != null)
+                if (worldMapHeight != null)
                 {
                     // TODO - facing direction
-                    var s = worldMap.Size.scale;
-                    for (int z = worldMap.Size.minZ; z < worldMap.Size.maxZ - s; z += s)
+                    var s = worldMapHeight.Size.scale;
+                    for (int z = worldMapHeight.Size.minZ; z < worldMapHeight.Size.maxZ - s; z += s)
                     {
-                        for (int x = worldMap.Size.minX; x < worldMap.Size.maxX - s; x += s)
+                        for (int x = worldMapHeight.Size.minX; x < worldMapHeight.Size.maxX - s; x += s)
                         {
                             yield return new List<Position>
                             {
-                                new Position(x, worldMap[z,x], z),
+                                new Position(x, worldMapHeight[z,x], z),
                                 //new Position(x+s, worldMap[z,x+s], z),
                                 //new Position(x+s, worldMap[z+s,x+s], z+s),
                                 //new Position(x, worldMap[z+s,x], z+s),

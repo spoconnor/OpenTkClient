@@ -24,13 +24,13 @@ namespace OpenTkClient
 		Font mono = new Font(FontFamily.GenericMonospace, 24);
 		float angle;
 		int[] textures = new int[255];
+		int[] largeTextures = new int[255];
         int boxListIndex;
         int boxListLargeIndex;
 		float mousePosX, mousePosY;
         Position selectedBlock = new Position(0,0,0);
 
         const int BlockTypeCursor = 51; // TODO
-        const int TextureGrass = 52; // TODO
 
         public GameRenderer()
 			: base(800, 600)
@@ -92,7 +92,11 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
 			textures[(int)BlockTypeCursor] = LoadTexture("cursor.png");
-            textures[(int)TextureGrass] = LoadTexture("grass_texture.png");
+
+            largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
+            largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
+            largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
+            largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
 
             renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
@@ -259,7 +263,7 @@ namespace OpenTkClient
             foreach (var poly in MapManager.GetWorldMapBlocks(Global.Direction))
             {
                 var scrPos = WorldToScreen(poly[0].X, poly[0].Y, poly[0].Z);
-                RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[0]);
+                RenderLargeBlock((float)e.Time,Block.BlockType.Grass, scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[0]);
                 //scrPos = WorldToScreen(poly[1].X, poly[1].Y, poly[1].Z);
                 //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[1]);
                 //scrPos = WorldToScreen(poly[2].X, poly[2].Y, poly[2].Z);
