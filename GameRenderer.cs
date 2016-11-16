@@ -262,8 +262,8 @@ namespace OpenTkClient
             // Render World Map
             foreach (var poly in MapManager.GetWorldMapBlocks(Global.Direction))
             {
-                var scrPos = WorldToScreen(poly[0].X, poly[0].Y, poly[0].Z);
-                RenderLargeBlock((float)e.Time,Block.BlockType.Grass, scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[0]);
+                var scrPos = WorldToScreen(poly.Item1.X, poly.Item1.Y, poly.Item1.Z);
+                RenderLargeBlock((float)e.Time,poly.Item2, scrPos.Item1, scrPos.Item2, scrPos.Item3,poly.Item1);
                 //scrPos = WorldToScreen(poly[1].X, poly[1].Y, poly[1].Z);
                 //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[1]);
                 //scrPos = WorldToScreen(poly[2].X, poly[2].Y, poly[2].Z);
@@ -279,6 +279,7 @@ namespace OpenTkClient
             foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
                 var pos = blockInfo.Item1;
+                if (pos.X != 2064 || pos.Z != 912) continue;
                 var blockType = blockInfo.Item2;
 
                 var scrPos = WorldToScreen(pos.X, pos.Y, pos.Z);
@@ -370,7 +371,7 @@ namespace OpenTkClient
         }
         void RenderLargeBlock(float time, Block.BlockType blockType, float x, float y, float z, Position pos)
         {
-            int texture = textures [(int)blockType];
+            int texture = largeTextures[(int)blockType];
             if (texture == 0)
                 return;
             GL.PushMatrix();

@@ -13,10 +13,11 @@ namespace OpenTkClient
 		private static SortedList<ChunkCoords, Chunk> _chunksW = new SortedList<ChunkCoords, Chunk>();
         private static Array<int> worldMapHeight;
         private static Array<int> worldMapBlocks;
+        private static int chunkMidpoint = Global.CHUNK_SIZE / 2;
 
         private static object _lock = new object ();
 
-        public static void SetWorldMapHeight(Sean.Shared.Comms.Message msg)
+        public static void SetWorldMap(Sean.Shared.Comms.Message msg)
         {
             var size = new ArraySize()
             {
@@ -28,23 +29,12 @@ namespace OpenTkClient
                 maxY = msg.WorldMapResponse.MaxPosition.Y,
                 maxZ = msg.WorldMapResponse.MaxPosition.Z,
             };
-            worldMapHeight = new Array<int>(size);
-            worldMapHeight.DeSerialize(msg.Data);
-        }
-        public static void SetWorldMapBlocks(Sean.Shared.Comms.Message msg)
-        {
-            var size = new ArraySize()
-            {
-                scale = msg.WorldMapResponse.Scale,
-                minX = msg.WorldMapResponse.MinPosition.X,
-                minY = msg.WorldMapResponse.MinPosition.Y,
-                minZ = msg.WorldMapResponse.MinPosition.Z,
-                maxX = msg.WorldMapResponse.MaxPosition.X,
-                maxY = msg.WorldMapResponse.MaxPosition.Y,
-                maxZ = msg.WorldMapResponse.MaxPosition.Z,
-            };
-            worldMapBlocks = new Array<int>(size);
-            worldMapBlocks.DeSerialize(msg.Data);
+            var map = new Array<int>(size);
+            map.DeSerialize(msg.Data);
+            if (msg.WorldMapResponse.MapRequestType == Sean.Shared.Comms.MapRequestType.HeightMap)
+                worldMapHeight = map;
+            else if (msg.WorldMapResponse.MapRequestType == Sean.Shared.Comms.MapRequestType.Terrain)
+                worldMapBlocks = map;
         }
 
         public static void AddChunk(Sean.Shared.Comms.Message msg)
@@ -92,11 +82,10 @@ namespace OpenTkClient
 			}
         }
 
-        public static IEnumerable<List<Position>> GetWorldMapBlocks(Facing direction)
-        {
+        public static IEnumerable<Tuple<Position, Block.BlockType>> GetWorldMapBlocks(Facing direction)        {
             lock (_lock)
             {
-                if (worldMapHeight != null)
+                if (worldMapHeight != null && worldMapBlocks != null)
                 {
                     // TODO - facing direction
                     var s = worldMapHeight.Size.scale;
@@ -104,13 +93,11 @@ namespace OpenTkClient
                     {
                         for (int x = worldMapHeight.Size.minX; x < worldMapHeight.Size.maxX - s; x += s)
                         {
-                            yield return new List<Position>
-                            {
-                                new Position(x, worldMapHeight[z,x], z),
-                                //new Position(x+s, worldMap[z,x+s], z),
-                                //new Position(x+s, worldMap[z+s,x+s], z+s),
-                                //new Position(x, worldMap[z+s,x], z+s),
-                            };
+                            if (Math.Abs(z - Global.LookingAt.Z) <= chunkMidpoint && Math.Abs(x - Global.LookingAt.X) <= chunkMidpoint)
+                            yield return 
+                                new Tuple<Position, Block.BlockType>(
+                                    new Position(x+chunkMidpoint, worldMapHeight[x,z], z+chunkMidpoint), 
+                                    (Block.BlockType)worldMapBlocks[x,z]);
                         }
                     }
                 }
