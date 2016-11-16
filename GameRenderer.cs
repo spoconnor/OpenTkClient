@@ -279,9 +279,7 @@ namespace OpenTkClient
             foreach (var blockInfo in MapManager.GetBlocks(Global.Direction))
             {
                 var pos = blockInfo.Item1;
-                if (pos.X != 2064 || pos.Z != 912) continue;
                 var blockType = blockInfo.Item2;
-
                 var scrPos = WorldToScreen(pos.X, pos.Y, pos.Z);
 				if (scrPos.Item1 < 0 || scrPos.Item1 > (this.Width * Global.Scale) 
 					|| scrPos.Item2 < 0 || scrPos.Item2 > (this.Height * Global.Scale)) {

@@ -93,7 +93,7 @@ namespace OpenTkClient
                     {
                         for (int x = worldMapHeight.Size.minX; x < worldMapHeight.Size.maxX - s; x += s)
                         {
-                            if (Math.Abs(z - Global.LookingAt.Z) <= chunkMidpoint && Math.Abs(x - Global.LookingAt.X) <= chunkMidpoint)
+                            if (Math.Abs(z - Global.LookingAt.Z) <= 32*3 && Math.Abs(x - Global.LookingAt.X) <= 32*3)
                             yield return 
                                 new Tuple<Position, Block.BlockType>(
                                     new Position(x+chunkMidpoint, worldMapHeight[x,z], z+chunkMidpoint), 
