@@ -56,15 +56,18 @@ namespace OpenTkClient
 				{
                     int x = Global.LookingAt.X / Global.CHUNK_SIZE;
 					int z = Global.LookingAt.Z / Global.CHUNK_SIZE;
-					SendGetMap(x,z);
-					//SendGetMap(x+1,z);
-					//SendGetMap(x-1,z);
-					//SendGetMap(x,z+1);
-					//SendGetMap(x,z-1);
-					//SendGetMap(x+1,z+1);
-					//SendGetMap(x+1,z-1);
-					//SendGetMap(x-1,z+1);
-					//SendGetMap(x-1,z-1);
+                    if (Global.Scale < 4)
+                    {
+                        SendGetMap(x, z);
+                        SendGetMap(x + 1, z);
+                        SendGetMap(x - 1, z);
+                        SendGetMap(x, z + 1);
+                        SendGetMap(x, z - 1);
+                        SendGetMap(x + 1, z + 1);
+                        SendGetMap(x + 1, z - 1);
+                        SendGetMap(x - 1, z + 1);
+                        SendGetMap(x - 1, z - 1);
+                    }
 					Thread.Sleep (2000);
 				}
 			
@@ -107,7 +110,7 @@ namespace OpenTkClient
         {
             try
             {
-                Console.WriteLine ($"Processing response... {msg.ToString ()}");
+                //Console.WriteLine ($"Processing response... {msg.ToString ()}");
                 if (msg.Map != null)
                 {
                     MapManager.AddChunk (msg);

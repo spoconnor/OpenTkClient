@@ -29,6 +29,8 @@ namespace OpenTkClient
         int boxListLargeIndex;
 		float mousePosX, mousePosY;
         Position selectedBlock = new Position(0,0,0);
+        ChunkCoords selectedChunk = new ChunkCoords(0, 0);
+        int selectedChunkHeight = 0;
 
         const int BlockTypeCursor = 51; // TODO
 
@@ -93,10 +95,22 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
 			textures[(int)BlockTypeCursor] = LoadTexture("cursor.png");
 
-            largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
-            largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
-            largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
-            largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
+            if (Global.CHUNK_SIZE == 32)
+            {
+                largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
+                largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
+                largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
+                largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
+                largeTextures[(int)BlockTypeCursor] = LoadTexture("cursor_32.png");
+            }
+            else if (Global.CHUNK_SIZE == 16)
+            {
+                largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
+                largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
+                largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
+                largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
+                largeTextures[(int)BlockTypeCursor] = LoadTexture("cursor_32.png");
+            }
 
             renderer = new TextRenderer(Width, Height);
 			PointF position = PointF.Empty;
@@ -174,7 +188,7 @@ namespace OpenTkClient
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            Console.WriteLine($"Mouse click. {selectedBlock}");
+            Console.WriteLine($"Mouse click. {selectedBlock} - {selectedChunk} {selectedChunkHeight}");
 
             //GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             //GL.LoadIdentity();                           // Reset Projection matrix
@@ -217,18 +231,36 @@ namespace OpenTkClient
 
 			KeyboardState keyState = Keyboard.GetState();
 
-			if (keyState.IsKeyDown (Key.W)) {
-				Global.LookingAt.X--;
-			} else if (keyState.IsKeyDown (Key.A)) {
-				Global.LookingAt.X++;
-            } else if (keyState.IsKeyDown (Key.S)) {
-				Global.LookingAt.Z++;
-			} else if (keyState.IsKeyDown (Key.Q)) {
-				Global.LookingAt.Z--;
-			} else if (keyState.IsKeyDown(Key.PageUp)) {
-                Global.Scale--;
+            if (keyState.IsKeyDown(Key.W))
+            {
+                Global.LookingAt.X = Global.LookingAt.X - (int)Math.Max(1, Global.Scale);
+            }
+            else if (keyState.IsKeyDown(Key.A))
+            {
+                Global.LookingAt.X = Global.LookingAt.X + (int)Math.Max(1, Global.Scale);
+            }
+            else if (keyState.IsKeyDown(Key.S))
+            {
+                Global.LookingAt.Z = Global.LookingAt.Z + (int)Math.Max(1, Global.Scale);
+            }
+            else if (keyState.IsKeyDown(Key.Q))
+            {
+                Global.LookingAt.Z = Global.LookingAt.Z - (int)Math.Max(1, Global.Scale);
+            }
+            else if (keyState.IsKeyDown(Key.E))
+            {
+                Global.LookingAt.Y++;
+            }
+            else if (keyState.IsKeyDown(Key.D))
+            {
+                Global.LookingAt.Y--;
+
+            } else if (keyState.IsKeyDown(Key.PageUp)) {
+                Global.Scale = Global.Scale - Global.Scale / 10;
+                Console.WriteLine($"Scale. {Global.Scale}");
             } else if (keyState.IsKeyDown(Key.PageDown)) {
-                Global.Scale++;
+                Global.Scale = Global.Scale + Global.Scale / 10;
+                Console.WriteLine($"Scale. {Global.Scale}");
             }
 
 //			if (keyState.IsKeyDown (Key.Number1)) {
@@ -243,7 +275,7 @@ namespace OpenTkClient
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
-		{            
+		{
             //RenderGui();
             GL.MatrixMode(MatrixMode.Projection);        // Select the Projection matrix for operation
             GL.LoadIdentity();                           // Reset Projection matrix
@@ -260,10 +292,17 @@ namespace OpenTkClient
 
             GL.PushMatrix();
             // Render World Map
+            var avgHeight = 0;
+            var count = 0;
             foreach (var poly in MapManager.GetWorldMapBlocks(Global.Direction))
             {
                 var scrPos = WorldToScreen(poly.Item1.X, poly.Item1.Y, poly.Item1.Z);
                 RenderLargeBlock((float)e.Time,poly.Item2, scrPos.Item1, scrPos.Item2, scrPos.Item3,poly.Item1);
+                if (Math.Abs(poly.Item1.Z - Global.LookingAt.Z) <= 100 && Math.Abs(poly.Item1.X - Global.LookingAt.X) <= 100)
+                {
+                    avgHeight += poly.Item1.Y;
+                    count++;
+                }
                 //scrPos = WorldToScreen(poly[1].X, poly[1].Y, poly[1].Z);
                 //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[1]);
                 //scrPos = WorldToScreen(poly[2].X, poly[2].Y, poly[2].Z);
@@ -271,6 +310,8 @@ namespace OpenTkClient
                 //scrPos = WorldToScreen(poly[3].X, poly[3].Y, poly[3].Z);
                 //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[3]);
             }
+            if (count > 0)
+                Global.LookingAt.Y = avgHeight / count;
             GL.PopMatrix ();
 
             // Render Local Chunks
@@ -376,6 +417,17 @@ namespace OpenTkClient
             GL.Translate(x,y,z);
             GL.BindTexture(TextureTarget.Texture2D, texture);
             GL.CallList(boxListLargeIndex);
+
+            if (Math.Abs(x - mousePosX) < 256 && Math.Abs(y - mousePosY) < 256)
+            {
+                texture = largeTextures[(int)BlockTypeCursor];
+                if (texture == 0)
+                    return;
+                GL.BindTexture(TextureTarget.Texture2D, texture);
+                GL.CallList(boxListLargeIndex);
+                selectedChunk = new ChunkCoords(pos);
+                selectedChunkHeight = pos.Y;
+            }
             GL.PopMatrix();
         }
         /*
@@ -471,7 +523,7 @@ namespace OpenTkClient
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             //GL.Scale (0.1, 0.1, 1.0);
-            float halfSprSize = 512;
+            float halfSprSize = Global.CHUNK_SIZE * 16; // 512 for 32 blocks, 256 for 16
             GL.Begin (PrimitiveType.Quads);
             GL.TexCoord2(0.0f, 1.0f); GL.Vertex2(-halfSprSize, -halfSprSize);
             GL.TexCoord2(1.0f, 1.0f); GL.Vertex2(halfSprSize, -halfSprSize);

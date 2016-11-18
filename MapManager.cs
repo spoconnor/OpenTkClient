@@ -11,8 +11,8 @@ namespace OpenTkClient
 		private static SortedList<ChunkCoords, Chunk> _chunksS = new SortedList<ChunkCoords, Chunk>();
 		private static SortedList<ChunkCoords, Chunk> _chunksE = new SortedList<ChunkCoords, Chunk>();
 		private static SortedList<ChunkCoords, Chunk> _chunksW = new SortedList<ChunkCoords, Chunk>();
-        private static Array<int> worldMapHeight;
-        private static Array<int> worldMapBlocks;
+        private static Array<byte> worldMapHeight;
+        private static Array<byte> worldMapBlocks;
         private static int chunkMidpoint = Global.CHUNK_SIZE / 2;
 
         private static object _lock = new object ();
@@ -29,7 +29,7 @@ namespace OpenTkClient
                 maxY = msg.WorldMapResponse.MaxPosition.Y,
                 maxZ = msg.WorldMapResponse.MaxPosition.Z,
             };
-            var map = new Array<int>(size);
+            var map = new Array<byte>(size);
             map.DeSerialize(msg.Data);
             if (msg.WorldMapResponse.MapRequestType == Sean.Shared.Comms.MapRequestType.HeightMap)
                 worldMapHeight = map;
@@ -93,7 +93,7 @@ namespace OpenTkClient
                     {
                         for (int x = worldMapHeight.Size.minX; x < worldMapHeight.Size.maxX - s; x += s)
                         {
-                            if (Math.Abs(z - Global.LookingAt.Z) <= 32*3 && Math.Abs(x - Global.LookingAt.X) <= 32*3)
+                            //if (Math.Abs(z - Global.LookingAt.Z) <= 100 && Math.Abs(x - Global.LookingAt.X) <= 100)
                             yield return 
                                 new Tuple<Position, Block.BlockType>(
                                     new Position(x+chunkMidpoint, worldMapHeight[x,z], z+chunkMidpoint), 
