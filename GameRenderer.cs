@@ -91,7 +91,9 @@ namespace OpenTkClient
 			textures[(int)Block.BlockType.Dirt] = LoadTexture("grass.png");
 			textures[(int)Block.BlockType.Tree] = LoadTexture("tree.png");
 			textures[(int)Block.BlockType.Leaves] = LoadTexture("leaves.png");
-			textures[(int)Block.BlockType.Water] = LoadTexture("water.png");
+            textures[(int)Block.BlockType.Ocean] = LoadTexture("water.png");
+            textures[(int)Block.BlockType.Water1] = LoadTexture("water.png");
+            textures[(int)Block.BlockType.WaterSource] = LoadTexture("water.png");
 			textures[(int)Block.BlockType.Placeholder1] = LoadTexture("character.png");
 			textures[(int)BlockTypeCursor] = LoadTexture("cursor.png");
 
@@ -100,7 +102,8 @@ namespace OpenTkClient
                 largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
                 largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
                 largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
-                largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
+                largeTextures[(int)Block.BlockType.Ocean] = LoadTexture("water_32.png");
+                largeTextures[(int)Block.BlockType.Water1] = LoadTexture("water_32.png");
                 largeTextures[(int)BlockTypeCursor] = LoadTexture("cursor_32.png");
             }
             else if (Global.CHUNK_SIZE == 16)
@@ -108,7 +111,8 @@ namespace OpenTkClient
                 largeTextures[(int)Block.BlockType.Rock] = LoadTexture("rock_32.png");
                 largeTextures[(int)Block.BlockType.Grass] = LoadTexture("grass_32.png");
                 largeTextures[(int)Block.BlockType.Dirt] = LoadTexture("grass_32.png");
-                largeTextures[(int)Block.BlockType.Water] = LoadTexture("water_32.png");
+                largeTextures[(int)Block.BlockType.Ocean] = LoadTexture("water_32.png");
+                largeTextures[(int)Block.BlockType.Water1] = LoadTexture("water_32.png");
                 largeTextures[(int)BlockTypeCursor] = LoadTexture("cursor_32.png");
             }
 
@@ -233,27 +237,27 @@ namespace OpenTkClient
 
             if (keyState.IsKeyDown(Key.W))
             {
-                Global.LookingAt.X = Global.LookingAt.X - (int)Math.Max(1, Global.Scale);
+                Global.LookingAt = new Position(Global.LookingAt.X - (int)Math.Max(1, Global.Scale), Global.LookingAt.Y, Global.LookingAt.Z);
             }
             else if (keyState.IsKeyDown(Key.A))
             {
-                Global.LookingAt.X = Global.LookingAt.X + (int)Math.Max(1, Global.Scale);
+                Global.LookingAt = new Position(Global.LookingAt.X + (int)Math.Max(1, Global.Scale), Global.LookingAt.Y, Global.LookingAt.Z);
             }
             else if (keyState.IsKeyDown(Key.S))
             {
-                Global.LookingAt.Z = Global.LookingAt.Z + (int)Math.Max(1, Global.Scale);
+                Global.LookingAt = new Position(Global.LookingAt.X, Global.LookingAt.Y, Global.LookingAt.Z + (int)Math.Max(1, Global.Scale));
             }
             else if (keyState.IsKeyDown(Key.Q))
             {
-                Global.LookingAt.Z = Global.LookingAt.Z - (int)Math.Max(1, Global.Scale);
+                Global.LookingAt = new Position(Global.LookingAt.X, Global.LookingAt.Y, Global.LookingAt.Z - (int)Math.Max(1, Global.Scale));
             }
             else if (keyState.IsKeyDown(Key.E))
             {
-                Global.LookingAt.Y++;
+                Global.LookingAt = new Position(Global.LookingAt.X, Global.LookingAt.Y+1, Global.LookingAt.Z);
             }
             else if (keyState.IsKeyDown(Key.D))
             {
-                Global.LookingAt.Y--;
+                Global.LookingAt = new Position(Global.LookingAt.X, Global.LookingAt.Y-1, Global.LookingAt.Z);
 
             } else if (keyState.IsKeyDown(Key.PageUp)) {
                 Global.Scale = Global.Scale - Global.Scale / 10;
@@ -311,7 +315,7 @@ namespace OpenTkClient
                 //RenderLargeBlock((float)e.Time,(Block.BlockType)TextureGrass,scrPos.Item1, scrPos.Item2, scrPos.Item3,poly[3]);
             }
             if (count > 0)
-                Global.LookingAt.Y = avgHeight / count;
+                Global.LookingAt = new Position(Global.LookingAt.X, avgHeight / count, Global.LookingAt.Z);
             GL.PopMatrix ();
 
             // Render Local Chunks
