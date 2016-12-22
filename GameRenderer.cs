@@ -187,7 +187,7 @@ namespace OpenTkClient
 
 		void OnMouseWheel (object sender, MouseWheelEventArgs e)
 		{
-			trimHeight = e.ValuePrecise;
+			trimHeight = e.ValuePrecise + Global.CHUNK_HEIGHT;
 		}
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
